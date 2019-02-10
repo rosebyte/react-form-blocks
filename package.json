@@ -1,6 +1,6 @@
 {
   "name": "react-form-blocks",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "keywords": [
     "react",
     "form"
@@ -15,7 +15,7 @@
   "author": "Jaroslav Ruzicka",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rosebyte/react-forms-blocks.git"
+    "url": "https://github.com/rosebyte/react-form-blocks.git"
   },
   "license": "MIT",
   "scripts": {
