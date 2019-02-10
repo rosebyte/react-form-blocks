@@ -17,5 +17,5 @@ npm-debug.log
 npm-debug.log.*
 
 #lock-files
-yarn.locks
+yarn.lock
 package-lock.json
