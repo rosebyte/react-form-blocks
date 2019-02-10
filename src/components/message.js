@@ -1,7 +1,6 @@
 import React, {PureComponent} from 'react';
 import PropTypes from "prop-types"
 import withForm from "../helpers/with-form";
-import {isFunction, isString} from "../helpers/utils";
 import renderElement from "../helpers/render-element";
 
 export const LEVELS = {
@@ -25,7 +24,7 @@ class InnerMessage extends PureComponent {
     };
 
     render() {
-        const {name, level = LEVELS.touched, render, children, component, ...rest} = this.props;
+        const {name, level = LEVELS.touched, ...rest} = this.props;
         const field = this.props.form.fields[name];
 
         if(this.props.hide || !field || (!field.error && !field.warning)){
@@ -38,14 +37,7 @@ class InnerMessage extends PureComponent {
 
         const content = {error: field.error, warning: field.warning};
 
-        const result = renderElement(component, children, render, content, rest);
-
-        return result ? result : (
-            <React.Fragment>
-                {field.error && <div className="error">{field.error}</div>}
-                {field.warning && <div className="warning">{field.warning}</div>}
-            </React.Fragment>
-        );
+        return renderElement(content, rest);
     }
 }
 

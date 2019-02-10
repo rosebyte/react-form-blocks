@@ -12,8 +12,8 @@ class Button extends React.Component {
     };
 
     render() {
-        let {form, type, disabled, value, render, children, component, hide, setSubmitted,
-            ...rest} = this.props;
+        let {form, type, disabled, value, hide, children, ...rest} = this.props;
+        delete rest.setSubmitted;
 
         const field = {
             disabled: disabled !== null ? disabled : form.working,
@@ -22,7 +22,7 @@ class Button extends React.Component {
             onClick: this.handleClick
         };
 
-        return hide ? null : renderElement(component, children, render, field, rest)
+        return hide ? null : renderElement(field, {...rest, children})
     }
 }
 

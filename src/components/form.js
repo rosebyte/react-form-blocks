@@ -60,7 +60,9 @@ export default class Form extends Component {
     }
 
     render() {
-        const {children, onChange, onSubmit, ...rest} = this.props;
+        const {children, ...rest} = this.props;
+        delete rest.onChange;
+        delete rest.onSubmit;
 
         return (
             <FormContext.Provider value={this.facade}>

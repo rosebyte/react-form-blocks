@@ -97,19 +97,23 @@ class InnerField extends PureComponent {
     }
 
     render() {
-        let {value, type, watch, validate, onChange, onBlur, form, edit, ...rest} = this.props;
-        let {name, render, children, component, disabled, autoDisable, hide, sync, ...props} = rest;
+        let {name, disabled, hide, form, ...props} = this.props;
 
-        disabled = disabled != null
-            ? disabled
-            : autoDisable != null && !autoDisable && form && form.working;
-        component = component || "input";
+        delete props.value;
+        delete props.type;
+        delete props.watch;
+        delete props.validate;
+        delete props.onChange;
+        delete props.onBlur;
+        delete props.edit;
+        delete props.sync;
+        props.component = props.component || "input";
 
         const field = {
             name,
             onChange: this.handleChange,
             onBlur: this.handleBlur,
-            disabled
+            disabled: disabled != null ? disabled : form.working
         };
 
         if(isCheckable(this.props.type)){
@@ -119,7 +123,7 @@ class InnerField extends PureComponent {
             field.value = this.state.value || "";
         }
 
-        return hide ? null : renderElement(component, children, render, field, props);
+        return hide ? null : renderElement(field, props);
     }
 }
 

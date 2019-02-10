@@ -7,57 +7,59 @@ import TestMessageController from "./test-objects/test-message-controller"
 
 configure({adapter: new Adapter()});
 
+function wrap(formProps = {}, messageProps = {}){
+    return (
+        <Form {...formProps}>
+            <Message {...messageProps} name="test">
+                {
+                    props => (
+                        <div className="output">
+                            {props.error && <p className="error">{props.error}</p>}
+                            {props.warning && <p className="warning">{props.warning}</p>}
+                        </div>
+                    )
+                }
+            </Message>
+        </Form>
+    )
+}
+
 describe("message", () => {
-    it("should propagate warning and error from form", () => {
-        const element = (
-            <Form fields={{test:{error: "E", warning: "W", touched: true}}}>
-                <Message name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-        const error = wrapper.find(".error");
-        expect(error.text()).toBe("E");
-        const warning = wrapper.find(".warning");
-        expect(warning.text()).toBe("W");
-    });
+    describe("rendering", () => {
+        it("should propagate warning and error from form", () => {
+            const formProps = {fields: {test:{error: "E", warning: "W", touched: true}}};
 
-    it("shouldn't propagate warning or error if it absents", () => {
-        const element = (
-            <Form fields={{test:{touched: true}}}>
-                <Message name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-        const error = wrapper.find(".error");
-        expect(error.exists()).toBeFalsy();
-        const warning = wrapper.find(".warning");
-        expect(warning.exists()).toBeFalsy();
-    });
+            const dom = mount(wrap(formProps));
 
-    it("shouldn't propagate warning if it absents", () => {
-        const element = (
-            <Form fields={{test:{error: "E", touched: true}}}>
-                <Message name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-        const error = wrapper.find(".error");
-        expect(error.text()).toBe("E");
-        const warning = wrapper.find(".warning");
-        expect(warning.exists()).toBeFalsy();
-    });
+            expect(dom.find(".error").text()).toBe("E");
+            expect(dom.find(".warning").text()).toBe("W");
+        });
 
-    it("shouldn't propagate error if it absents", () => {
-        const element = (
-            <Form fields={{test:{warning: "W", touched: true}}}>
-                <Message name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-        const error = wrapper.find(".error");
-        expect(error.exists()).toBeFalsy();
-        const warning = wrapper.find(".warning");
-        expect(warning.text()).toBe("W");
+        it("shouldn't propagate warning or error if it absents", () => {
+            const formProps = {fields: {test:{error: null, touched: true}}};
+
+            const dom = mount(wrap(formProps));
+
+            expect(dom.find(".output").exists()).toBeFalsy();
+        });
+
+        it("shouldn't propagate warning if it absents", () => {
+            const formProps = {fields: {test:{error: "E", touched: true}}};
+
+            const dom = mount(wrap(formProps));
+
+            expect(dom.find(".error").text()).toBe("E");
+            expect(dom.find(".warning").exists()).toBeFalsy();
+        });
+
+        it("shouldn't propagate error if it absents", () => {
+            const formProps = {fields: {test:{warning: "W", touched: true}}};
+
+            const dom = mount(wrap(formProps));
+
+            expect(dom.find(".error").exists()).toBeFalsy();
+            expect(dom.find(".warning").text()).toBe("W");
+        });
     });
 
     it("shouldn't propagate error below level", () => {
