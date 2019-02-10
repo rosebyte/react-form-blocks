@@ -1,6 +1,6 @@
 {
   "name": "react-form-blocks",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "keywords": [
     "react",
     "form"
@@ -10,7 +10,8 @@
   "module": "dist/react-form-blocks.esm.js",
   "sideEffects": false,
   "files": [
-    "/dist"
+    "/dist",
+    "index.js"
   ],
   "author": "Jaroslav Ruzicka",
   "repository": {
@@ -54,7 +55,6 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^3.2.1",
-    "npm": "^6.7.0",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
