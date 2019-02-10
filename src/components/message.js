@@ -8,7 +8,7 @@ export const LEVELS = {
     changed: 1
 };
 
-class InnerMessage extends PureComponent {
+class Message extends PureComponent {
     componentDidMount(){
         this.props.form.register({name: this.props.name}, this.handlePeerChange, "message");
     }
@@ -41,7 +41,7 @@ class InnerMessage extends PureComponent {
     }
 }
 
-InnerMessage.propTypes = {
+Message.propTypes = {
     name: PropTypes.string.isRequired,
     hide: PropTypes.bool,
     level: PropTypes.number,
@@ -54,10 +54,10 @@ InnerMessage.propTypes = {
     })
 };
 
-InnerMessage.defaultProps = {
+Message.defaultProps = {
     level: LEVELS.touched,
     hide: false,
     form: {}
 };
 
-export default withForm(InnerMessage);
+export default withForm(Message);
