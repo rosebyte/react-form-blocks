@@ -1,10 +1,11 @@
 import React, {PureComponent} from 'react';
 import PropTypes from "prop-types"
+import {CHANGES} from "./form";
 import withForm from "../helpers/with-form";
 import renderElement from "../helpers/render-element";
 
 export const LEVELS = {
-    allways: 0,
+    always: 0,
     changed: 1,
     dirty: 2,
     touched: 3,
@@ -14,17 +15,17 @@ export const LEVELS = {
 
 class Message extends PureComponent {
     componentDidMount(){
-        this.props.form.register({name: this.props.name}, this.handlePeerChange, "message");
+        this.props.form.register({name: this.props.name}, this.handleFieldChange, CHANGES.feedback);
     }
 
     componentWillUnmount(){
-        this.props.form.unregister(this.props.name);
+        this.props.form.unregister(this.props.name, CHANGES.feedback);
     }
 
-    handlePeerChange = () => this.forceUpdate();
+    handleFieldChange = () => this.forceUpdate();
 
     render() {
-        const {name, level = LEVELS.touched, hide, ...rest} = this.props;
+        const {name, level, hide, ...rest} = this.props;
         const field = this.props.form.fields[name];
         const submitted = this.props.form.submitted;
 

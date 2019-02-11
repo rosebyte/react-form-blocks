@@ -62,7 +62,7 @@ class InnerField extends PureComponent {
     };
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.handlePeerChange);
+        this.props.form.register(this.facade, this.handlePeerChange, CHANGES.value);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -92,7 +92,7 @@ class InnerField extends PureComponent {
     }
 
     componentWillUnmount(){
-        this.props.form.unregister(this.name);
+        this.props.form.unregister(this.name, CHANGES.value);
     }
 
     render() {

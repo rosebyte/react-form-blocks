@@ -27,11 +27,11 @@ export default class Form extends Component {
         this.props.onChange(this.fields)
     };
 
-    register = (facade, peerChangeHandler, type = "field") => {
-        if(type === "field"){
+    register = (facade, peerChangeHandler, type) => {
+        if(type === CHANGES.value){
             this.fields[facade.name] = facade;
             this.valueHandlers[facade.name] = peerChangeHandler;
-        } else if(type === "message"){
+        } else if(type === CHANGES.feedback){
             this.errorHandlers[facade.name] = peerChangeHandler;
         }
     };
