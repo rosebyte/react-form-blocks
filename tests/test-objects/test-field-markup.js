@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from "prop-types"
-import withForm from "../../../src/helpers/with-form";
+import withForm from "../../src/helpers/with-form";
 
 export class TestFieldMarkup extends PureComponent {
     render() {
