@@ -3,7 +3,7 @@ import {shallow, configure, mount} from "enzyme"
 import Adapter from 'enzyme-adapter-react-16';
 import Field from "../../src/components/field";
 import Form from "../../src/components/form";
-import TestFieldController from "./test-objects/test-field-controller"
+import TestFieldController from "../test-objects/test-field-controller"
 
 configure({adapter: new Adapter()});
 
