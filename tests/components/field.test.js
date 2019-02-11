@@ -165,34 +165,7 @@ describe("FormField tests", () => {
         );
         const wrapper = mount(sut);
         wrapper.find("input").simulate("change", {target:{value: "changed"}});
-        expect(state.name.error).toBe("Error: changed");
-    });
-
-    it('should validate using error property after change', () => {
-        let state = null;
-        let validate = value => ({error: "Error: " + value});
-        const sut = (
-            <Form onChange={x => state = x}>
-                <Field value="value" name="name" validate={validate} />
-            </Form>
-        );
-        const wrapper = mount(sut);
-        wrapper.find("input").simulate("change", {target:{value: "changed"}});
-        expect(state.name.error).toBe("Error: changed");
-    });
-
-    it('should validate using warning property after change', () => {
-        let state = null;
-        let validate = value => ({warning: "Error: " + value});
-        const sut = (
-            <Form onChange={x => state = x}>
-                <Field value="value" name="name" validate={validate} />
-            </Form>
-        );
-        const wrapper = mount(sut);
-        wrapper.find("input").simulate("change", {target:{value: "changed"}});
-        expect(state.name.error).toBeNull();
-        expect(state.name.warning).toBe("Error: changed");
+        expect(state.name.feedback).toBe("Error: changed");
     });
 });
 
