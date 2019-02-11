@@ -165,7 +165,7 @@ describe("FormField tests", () => {
         );
         const wrapper = mount(sut);
         wrapper.find("input").simulate("change", {target:{value: "changed"}});
-        expect(state.name.feedback).toBe("Error: changed");
+        expect(state.name.message).toBe("Error: changed");
     });
 });
 

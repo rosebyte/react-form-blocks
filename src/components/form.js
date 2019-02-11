@@ -3,9 +3,9 @@ import PropTypes from "prop-types"
 import {anyFieldContainsError, checkActiveElement, forEachProperty, preventDefault} from "../helpers/utils";
 
 export const FormContext = React.createContext({});
-export const CHANGES = {
-    value: "value",
-    feedback: "feedback"
+export const ELEMENTS = {
+    FIELD: "field",
+    MESSAGE: "message"
 };
 
 export default class Form extends Component {
@@ -18,9 +18,9 @@ export default class Form extends Component {
     };
 
     fieldChanged = (field, type) => {
-        if(type === CHANGES.value){
+        if(type === ELEMENTS.FIELD){
             forEachProperty(this.valueHandlers, (f, p) => {if(p !== field.name){f(field.name)}});
-        } else if(type === CHANGES.feedback){
+        } else if(type === ELEMENTS.MESSAGE){
             forEachProperty(this.errorHandlers, (f, p) => {if(p === field.name){f(field.name)}});
         }
 
@@ -28,10 +28,10 @@ export default class Form extends Component {
     };
 
     register = (facade, peerChangeHandler, type) => {
-        if(type === CHANGES.value){
+        if(type === ELEMENTS.FIELD){
             this.fields[facade.name] = facade;
             this.valueHandlers[facade.name] = peerChangeHandler;
-        } else if(type === CHANGES.feedback){
+        } else if(type === ELEMENTS.MESSAGE){
             this.errorHandlers[facade.name] = peerChangeHandler;
         }
     };

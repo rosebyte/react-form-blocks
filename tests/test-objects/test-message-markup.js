@@ -3,17 +3,17 @@ import PropTypes from "prop-types"
 
 export default class TestMessageMarkup extends PureComponent {
     render() {
-        const {feedback, title} = this.props;
+        const {message, title} = this.props;
         return (
             <div>
                 <div className="title">{title}</div>
-                {feedback && <div className="error">{feedback}</div>}
+                {message && <div className="error">{message}</div>}
             </div>
         )
     }
 }
 
 TestMessageMarkup.propTypes = {
-    feedback: PropTypes.string,
+    message: PropTypes.string,
     title: PropTypes.string.isRequired
 };

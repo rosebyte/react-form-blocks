@@ -1,6 +1,6 @@
 import React, {PureComponent} from 'react';
 import PropTypes from "prop-types"
-import {CHANGES} from "./form";
+import {ELEMENTS} from "./form";
 import withForm from "../helpers/with-form";
 import renderElement from "../helpers/render-element";
 
@@ -15,11 +15,11 @@ export const LEVELS = {
 
 class Message extends PureComponent {
     componentDidMount(){
-        this.props.form.register({name: this.props.name}, this.handleFieldChange, CHANGES.feedback);
+        this.props.form.register({name: this.props.name}, this.handleFieldChange, ELEMENTS.MESSAGE);
     }
 
     componentWillUnmount(){
-        this.props.form.unregister(this.props.name, CHANGES.feedback);
+        this.props.form.unregister(this.props.name, ELEMENTS.MESSAGE);
     }
 
     handleFieldChange = () => this.forceUpdate();
@@ -29,14 +29,14 @@ class Message extends PureComponent {
         const field = this.props.form.fields[name];
         const submitted = this.props.form.submitted;
 
-        if(!field || !field.feedback){return null;}
+        if(!field || !field.message){return null;}
         if(level === LEVELS.never || hide){return null;}
         if(level === LEVELS.submitted && !submitted){return null;}
         if(level === LEVELS.touched && !field.touched && !submitted){return null;}
         if(level === LEVELS.dirty && !field.dirty){return null;}
         if(level === LEVELS.changed && !field.dirty && !field.touched && !submitted){return null;}
 
-        return renderElement({feedback: field.feedback}, rest);
+        return renderElement({message: field.message}, rest);
     }
 }
 

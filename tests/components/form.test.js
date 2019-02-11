@@ -92,7 +92,7 @@ describe("Form tests", () => {
         );
         const wrapper = mount(sut);
         wrapper.find("input").at(0).simulate("change", {target:{value: "changed"}});
-        const second = wrapper.find("input").at(1).parent().prop("form").fields.surname.feedback;
+        const second = wrapper.find("input").at(1).parent().prop("form").fields.surname.message;
         expect(second).toBe("this works!")
     });
 });

@@ -10,29 +10,29 @@ import deepmerge from "../test-helpers/deep-merge";
 
 configure({adapter: new Adapter()});
 const VALUE = "anything";
-const ID = "feedback";
+const ID = "msg";
 const REF = "#" + ID;
 const NAME = "test";
 
 function Message(props){
     const {context, name = NAME, ...rest} = props;
     const defaultField = {};
-    defaultField[NAME] = {feedback: VALUE, touched: false, dity: false};
+    defaultField[NAME] = {message: VALUE, touched: false, dity: false};
     const ctx = deepmerge({}, {fields: defaultField}, context);
     const field = {...rest, name};
-    const message = (<BaseMessage {...field}>{x => <p id={ID}>{x.feedback}</p>}</BaseMessage>);
+    const message = (<BaseMessage {...field}>{x => <p id={ID}>{x.message}</p>}</BaseMessage>);
     return withFakeContext(ctx, message);
 }
 
-it("should pass feedback", () => {
+it("should pass message", () => {
     const dom = mount(<Message level={LEVELS.always} />);
 
     expect(dom.find(REF).text()).toBe(VALUE);
 });
 
-it("shouldn't pass empty feedback", () => {
+it("shouldn't pass empty message", () => {
     const props = {
-        context: {fields: {test:{feedback: null, warning: null}}},
+        context: {fields: {test:{message: null, warning: null}}},
         level: LEVELS.always
     };
 
@@ -41,7 +41,7 @@ it("shouldn't pass empty feedback", () => {
     expect(dom.find(REF).exists()).toBeFalsy();
 });
 
-it("should react on field's feedback change", done => {
+it("should react on field's message change", done => {
     const validate = value => "This is error: " + value;
     const element = (
         <Form>
@@ -61,7 +61,7 @@ it("should react on field's feedback change", done => {
 
 it("should work in components hierarchy", () => {
     const element = (
-        <Form fields={{test:{feedback: VALUE, touched: true}}}>
+        <Form fields={{test:{message: VALUE, touched: true}}}>
             <TestMessageController name={NAME} />
         </Form>
     );

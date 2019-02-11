@@ -2,13 +2,13 @@ import React, { PureComponent } from 'react';
 import {getEventValue, isCheckable, preventDefault} from "../helpers/utils"
 import PropTypes from "prop-types"
 import withForm from "../helpers/with-form";
-import {CHANGES} from "./form";
+import {ELEMENTS} from "./form";
 import renderElement from "../helpers/render-element";
 
 class InnerField extends PureComponent {
     name = this.props.name;
     state = {
-        feedback: null,
+        message: null,
         touched: false,
         dirty: false,
         value: this.props.value
@@ -18,7 +18,7 @@ class InnerField extends PureComponent {
         const self = this;
         return {
             get name(){return self.name;},
-            get feedback(){return self.state.feedback;},
+            get message(){return self.state.message;},
             get touched(){return self.state.touched;},
             get dirty(){return self.state.dirty;},
             get value(){return self.state.value;},
@@ -62,7 +62,7 @@ class InnerField extends PureComponent {
     };
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.handlePeerChange, CHANGES.value);
+        this.props.form.register(this.facade, this.handlePeerChange, ELEMENTS.FIELD);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -72,16 +72,16 @@ class InnerField extends PureComponent {
         }
 
         if(prevState !== this.state){
-            this.props.form.fieldChanged(this.facade, CHANGES.value);
+            this.props.form.fieldChanged(this.facade, ELEMENTS.FIELD);
             this.props.onChange({...this.state});
         }
     }
 
     static getDerivedStateFromProps(props, state){
-        let feedback = props.validate(state.value, state.feedback);
-        if(feedback !== state.feedback){
-            state.feedback = feedback;
-            props.form.fieldChanged(state, CHANGES.feedback)
+        let message = props.validate(state.value, state.message);
+        if(message !== state.message){
+            state.message = message;
+            props.form.fieldChanged(state, ELEMENTS.MESSAGE)
         }
 
         if(props.name !== state.name){
@@ -92,7 +92,7 @@ class InnerField extends PureComponent {
     }
 
     componentWillUnmount(){
-        this.props.form.unregister(this.name, CHANGES.value);
+        this.props.form.unregister(this.name, ELEMENTS.FIELD);
     }
 
     render() {
