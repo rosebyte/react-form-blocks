@@ -21,30 +21,21 @@ class Message extends PureComponent {
         this.props.form.unregister(this.props.name);
     }
 
-    handlePeerChange = changedField => {
-        if(changedField === this.props.name){
-            this.forceUpdate()
-        }
-    };
+    handlePeerChange = () => this.forceUpdate();
 
     render() {
         const {name, level = LEVELS.touched, hide, ...rest} = this.props;
         const field = this.props.form.fields[name];
         const submitted = this.props.form.submitted;
 
-        if(!field){return null;}
-        if(!field.error && !field.warning){return null;}
+        if(!field || !field.feedback){return null;}
         if(level === LEVELS.never || hide){return null;}
         if(level === LEVELS.submitted && !submitted){return null;}
         if(level === LEVELS.touched && !field.touched && !submitted){return null;}
         if(level === LEVELS.dirty && !field.dirty){return null;}
         if(level === LEVELS.changed && !field.dirty && !field.touched && !submitted){return null;}
 
-        const content = {};
-        if(field.error){content.error = field.error}
-        if(field.warning){content.warning = field.warning}
-
-        return renderElement(content, rest);
+        return renderElement({feedback: field.feedback}, rest);
     }
 }
 

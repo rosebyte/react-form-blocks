@@ -2,97 +2,40 @@ import React from "react"
 import {configure, mount} from "enzyme"
 import Adapter from 'enzyme-adapter-react-16';
 import Form from "../../src/components/form";
-import Tmess, {LEVELS} from "../../src/components/message";
+import BaseMessage, {LEVELS} from "../../src/components/message";
 import TestMessageController from "../test-objects/test-message-controller"
-import mockFormContext, {withFakeContext} from "../test-helpers/context-provider";
+import {withFakeContext} from "../test-helpers/context-provider";
 import TestFieldController from "../test-objects/test-field-controller";
+import deepmerge from "../test-helpers/deep-merge";
 
 configure({adapter: new Adapter()});
+const testValue = "anything";
 
 function Message(props){
     const {context, name = "test", ...rest} = props;
-    return mockFormContext(
-        context,
-        {...rest, name},
-        "../../src/components/message",
-        props => (
-            <div className="output">
-            {props.error && <p className="error">{props.error}</p>}
-            {props.warning && <p className="warning">{props.warning}</p>}
-            </div>
-        )
-    )
+    const defaultField = {test:{feedback: testValue, touched: false, dity: false}};
+    const ctx = deepmerge({}, {fields: defaultField}, context);
+    const field = {...rest, name};
+    const message = (<BaseMessage {...field}>{x => <p id="error">{x.feedback}</p>}</BaseMessage>);
+    return withFakeContext(ctx, message);
 }
-
-function MessageFunc(props){
-    return (
-        <Tmess {...props}>
-            {
-                props => (
-                    <div className="output">
-                        {props.error && <p className="error">{props.error}</p>}
-                        {props.warning && <p className="warning">{props.warning}</p>}
-                    </div>
-                )
-            }
-        </Tmess>
-    )
-}
-
-beforeEach(() => {
-    jest.resetModules();
-});
-
-const defaultContext = {
-    submitted: false,
-    register: () => {},
-    fields: {test:{error: "E", warning: "W", touched: false, dity: false}}
-};
 
 describe("rendering message", () => {
     it("should propagate warning and error from form", () => {
-        const elem = withFakeContext(defaultContext, <MessageFunc name="test" level={LEVELS.allways} />);
+        const dom = mount(<Message name="test" level={LEVELS.allways} />);
 
-        //const dom = mount(<Message context={{fields:{test:{touched: true}}}} />);
-        const dom = mount(elem);
-
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
-    it("shouldn't propagate warning or error if it absents", () => {
+    it("shouldn't propagate warning nor error if it absents", () => {
         const props = {
-            context: {fields: {test:{error: null, warning: null}}},
+            context: {fields: {test:{feedback: null, warning: null}}},
             level: LEVELS.allways
         };
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".output").exists()).toBeFalsy();
-    });
-
-    it("shouldn't propagate warning if it absents", () => {
-        const props = {
-            context: {fields: {test:{warning: null}}},
-            level: LEVELS.allways
-        };
-
-        const dom = mount(<Message {...props} />);
-
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").exists()).toBeFalsy();
-    });
-
-    it("shouldn't propagate error if it absents", () => {
-        const props = {
-            context: {fields: {test:{error: null}}},
-            level: LEVELS.allways
-        };
-
-        const dom = mount(<Message {...props} />);
-
-        expect(dom.find(".error").exists()).toBeFalsy();
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").exists()).toBeFalsy();
     });
 });
 
@@ -100,8 +43,7 @@ describe("using message levels", () => {
     it("shouldn't show submitted level when not submitted", () => {
         const dom = mount(<Message level={LEVELS.submitted} />);
 
-        expect(dom.find(".error").exists()).toBeFalsy();
-        expect(dom.find(".warning").exists()).toBeFalsy();
+        expect(dom.find("#error").exists()).toBeFalsy();
     });
 
     it("should show submitted level when submitted", () => {
@@ -109,8 +51,7 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should show allways level even when not submitted", () => {
@@ -118,8 +59,7 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should not show wnen never level", () => {
@@ -130,15 +70,13 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").exists()).toBeFalsy();
-        expect(dom.find(".warning").exists()).toBeFalsy();
+        expect(dom.find("#error").exists()).toBeFalsy();
     });
 
     it("should not show when touched level and not touched, submited", () => {
         const dom = mount(<Message level={LEVELS.touched} />);
 
-        expect(dom.find(".error").exists()).toBeFalsy();
-        expect(dom.find(".warning").exists()).toBeFalsy();
+        expect(dom.find("#error").exists()).toBeFalsy();
     });
 
     it("should show when touched level and touched", () => {
@@ -149,8 +87,7 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should show when touched level and submitted", () => {
@@ -161,15 +98,13 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should not show when dirty level and not dirty", () => {
         const dom = mount(<Message level={LEVELS.dirty} />);
 
-        expect(dom.find(".error").exists()).toBeFalsy();
-        expect(dom.find(".warning").exists()).toBeFalsy();
+        expect(dom.find("#error").exists()).toBeFalsy();
     });
 
     it("should show when dirty level and dirty", () => {
@@ -180,15 +115,13 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should not show when changed level and not dirty, touched, submitted", () => {
         const dom = mount(<Message level={LEVELS.changed} />);
 
-        expect(dom.find(".error").exists()).toBeFalsy();
-        expect(dom.find(".warning").exists()).toBeFalsy();
+        expect(dom.find("#error").exists()).toBeFalsy();
     });
 
     it("should show when changed level and dirty", () => {
@@ -199,8 +132,7 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should show when changed level and touched", () => {
@@ -211,8 +143,7 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
 
     it("should show when changed level and submitted", () => {
@@ -223,10 +154,8 @@ describe("using message levels", () => {
 
         const dom = mount(<Message {...props} />);
 
-        expect(dom.find(".error").text()).toBe("E");
-        expect(dom.find(".warning").text()).toBe("W");
+        expect(dom.find("#error").text()).toBe(testValue);
     });
-
 });
 
 describe("message reflects changes of watched field", () => {
@@ -243,25 +172,6 @@ describe("message reflects changes of watched field", () => {
         wrapper.find("input").simulate("change", {target:{value: "change"}});
         setImmediate(() => {
             expect(wrapper.find(".error").text()).toBe("This is error: change");
-            expect(wrapper.find(".warning").exists()).toBeFalsy();
-            done();
-        });
-    });
-
-    it("should reflect field warning raised", done => {
-        const validate = value => ({warning: "This is warning: " + value});
-        const element = (
-            <Form>
-                <TestFieldController validate={validate} name="test"/>
-                <TestMessageController name="test" level={LEVELS.allways} />
-            </Form>
-        );
-        const wrapper = mount(element);
-
-        wrapper.find("input").simulate("change", {target:{value: "change"}});
-        setImmediate(() => {
-            expect(wrapper.find(".warning").text()).toBe("This is warning: change");
-            expect(wrapper.find(".error").exists()).toBeFalsy();
             done();
         });
     });
@@ -270,60 +180,13 @@ describe("message reflects changes of watched field", () => {
 describe("Message used with outer markup", () => {
     it("should propagate warning and error from form", () => {
         const element = (
-            <Form fields={{test:{error: "E", warning: "W", touched: true}}}>
+            <Form fields={{test:{feedback: testValue, touched: true}}}>
                 <TestMessageController name="test" />
             </Form>
         );
         const wrapper = mount(element);
 
-        expect(wrapper.find(".error").text()).toBe("E");
-        expect(wrapper.find(".warning").text()).toBe("W");
+        expect(wrapper.find(".error").text()).toBe(testValue);
         expect(wrapper.find(".title").text()).toBe("test title");
-    });
-
-    it("shouldn't propagate warning or error if it absents", () => {
-        const element = (
-            <Form fields={{test:{touched: true}}}>
-                <TestMessageController name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-
-        expect(wrapper.find(".error").exists()).toBeFalsy();
-        expect(wrapper.find(".warning").exists()).toBeFalsy();
-    });
-
-    it("shouldn't propagate warning if it absents", () => {
-        const element = (
-            <Form fields={{test:{error: "E", touched: true}}}>
-                <TestMessageController name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-
-        expect(wrapper.find(".warning").exists()).toBeFalsy();
-    });
-
-    it("shouldn't propagate error if it absents", () => {
-        const element = (
-            <Form fields={{test:{warning: "W", touched: true}}}>
-                <TestMessageController name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-
-        expect(wrapper.find(".error").exists()).toBeFalsy();
-    });
-
-    it("shouldn't propagate error below level", () => {
-        const element = (
-            <Form fields={{test:{error: "E", touched: false}}}>
-                <TestMessageController name="test" />
-            </Form>
-        );
-        const wrapper = mount(element);
-
-        expect(wrapper.find(".error").exists()).toBeFalsy();
-        expect(wrapper.find(".warning").exists()).toBeFalsy();
     });
 });

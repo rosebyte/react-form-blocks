@@ -1,24 +1,19 @@
 import React, { PureComponent } from 'react';
 import PropTypes from "prop-types"
-import withForm from "../../src/helpers/with-form";
 
-export class TestMessageMarkup extends PureComponent {
+export default class TestMessageMarkup extends PureComponent {
     render() {
-        const {error, warning, title} = this.props;
+        const {feedback, title} = this.props;
         return (
             <div>
                 <div className="title">{title}</div>
-                {error && <div className="error">{error}</div>}
-                {warning && <div className="warning">{warning}</div>}
+                {feedback && <div className="error">{feedback}</div>}
             </div>
         )
     }
 }
 
 TestMessageMarkup.propTypes = {
-    error: PropTypes.string,
-    warning: PropTypes.string,
+    feedback: PropTypes.string,
     title: PropTypes.string.isRequired
 };
-
-export default withForm(TestMessageMarkup)

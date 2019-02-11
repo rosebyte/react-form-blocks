@@ -1,14 +1,14 @@
 import React, { PureComponent } from 'react';
-import {isString, getEventValue, isCheckable, isObject, preventDefault} from "../helpers/utils"
+import {getEventValue, isCheckable, preventDefault} from "../helpers/utils"
 import PropTypes from "prop-types"
 import withForm from "../helpers/with-form";
+import {CHANGES} from "./form";
 import renderElement from "../helpers/render-element";
 
 class InnerField extends PureComponent {
     name = this.props.name;
     state = {
-        error: null,
-        warning: null,
+        feedback: null,
         touched: false,
         dirty: false,
         value: this.props.value
@@ -18,8 +18,7 @@ class InnerField extends PureComponent {
         const self = this;
         return {
             get name(){return self.name;},
-            get error(){return self.state.error;},
-            get warning(){return self.state.warning;},
+            get feedback(){return self.state.feedback;},
             get touched(){return self.state.touched;},
             get dirty(){return self.state.dirty;},
             get value(){return self.state.value;},
@@ -45,9 +44,18 @@ class InnerField extends PureComponent {
         this.props.onBlur(event);
     };
 
-    handleChange = (event) => {
+    extractValue = event => {
+        if(this.props.getValue){
+            return this.props.extractValue(event);
+        }
+
+        return getEventValue(event, this.props.type);
+    };
+
+    handleChange = event => {
         preventDefault(event);
-        let value = this.props.edit(this.state.value, getEventValue(event, this.props.type));
+        let newValue = this.extractValue(event);
+        let value = this.props.edit(this.state.value, newValue);
         if(value !== this.state.value){
             this.setState({...this.state, value, dirty: true});
         }
@@ -64,37 +72,20 @@ class InnerField extends PureComponent {
         }
 
         if(prevState !== this.state){
-            this.props.form.fieldChanged(this.facade);
+            this.props.form.fieldChanged(this.facade, CHANGES.value);
             this.props.onChange({...this.state});
         }
     }
 
     static getDerivedStateFromProps(props, state){
-        state.error = null;
-        state.warning = null;
-        let changed = false;
-
-        let error = props.validate(state.value);
-        if(isString(error)){
-            state.error = error;
-            changed = "error"
-        } else if(isObject(error)){
-            if(error.error){
-                state.error = error.error;
-                changed = "error"
-            }
-            if(error.warning){
-                state.warning = error.warning;
-                changed = "warning"
-            }
+        let feedback = props.validate(state.value, state.feedback);
+        if(feedback !== state.feedback){
+            state.feedback = feedback;
+            props.form.fieldChanged(state, CHANGES.feedback)
         }
 
         if(props.name !== state.name){
             state.name = props.name;
-        }
-
-        if(changed){
-            props.form.fieldChanged({...state}, "validation")
         }
 
         return state;
@@ -105,7 +96,7 @@ class InnerField extends PureComponent {
     }
 
     render() {
-        let {name, disabled, hide, form, ...props} = this.props;
+        let {name, disabled, hide, form, noValue, noBlur, ...props} = this.props;
 
         delete props.value;
         delete props.type;
@@ -115,20 +106,27 @@ class InnerField extends PureComponent {
         delete props.onBlur;
         delete props.edit;
         delete props.sync;
+        delete props.extractValue;
+
         props.component = props.component || "input";
 
         const field = {
             name,
             onChange: this.handleChange,
-            onBlur: this.handleBlur,
             disabled: disabled != null ? disabled : form.working
         };
 
-        if(isCheckable(this.props.type)){
-            field.checked = this.state.value || false;
+        if(!noBlur){
+            field.onBlur = this.handleBlur
         }
-        else{
-            field.value = this.state.value || "";
+
+        if(!noValue){
+            if(isCheckable(this.props.type)){
+                field.checked = this.state.value || false;
+            }
+            else{
+                field.value = this.state.value || "";
+            }
         }
 
         return hide ? null : renderElement(field, props);
@@ -143,7 +141,10 @@ InnerField.propTypes = {
     component: PropTypes.any,
     onChange: PropTypes.func,
     onBlur: PropTypes.func,
+    noBlur: PropTypes.bool,
     value: PropTypes.any,
+    noValue: PropTypes.bool,
+    extractValue: PropTypes.func,
     validate: PropTypes.func,
     edit: PropTypes.func,
     sync: PropTypes.func,

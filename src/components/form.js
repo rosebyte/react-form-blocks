@@ -3,6 +3,10 @@ import PropTypes from "prop-types"
 import {anyFieldContainsError, checkActiveElement, forEachProperty, preventDefault} from "../helpers/utils";
 
 export const FormContext = React.createContext({});
+export const CHANGES = {
+    value: "value",
+    feedback: "feedback"
+};
 
 export default class Form extends Component {
     fields = this.props.fields || {};
@@ -13,10 +17,10 @@ export default class Form extends Component {
         submitted: false
     };
 
-    fieldChanged = (field, type = "value") => {
-        if(type === "value"){
+    fieldChanged = (field, type) => {
+        if(type === CHANGES.value){
             forEachProperty(this.valueHandlers, (f, p) => {if(p !== field.name){f(field.name)}});
-        } else if(type === "validation"){
+        } else if(type === CHANGES.feedback){
             forEachProperty(this.errorHandlers, (f, p) => {if(p === field.name){f(field.name)}});
         }
 
