@@ -72,6 +72,12 @@ it("should work in components hierarchy", () => {
     expect(wrapper.find(".title").text()).toBe("test title");
 });
 
+it("should be hidden with hide prop", () => {
+    const dom = mount(<Message level={LEVELS.always} hide={true} />);
+
+    expect(dom.find(REF).exists()).toBeFalsy();
+});
+
 describe("message level tests", () => {
     it("shouldn't show submitted level when not submitted", () => {
         const dom = mount(<Message level={LEVELS.submitted} />);
