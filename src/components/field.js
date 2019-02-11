@@ -72,21 +72,29 @@ class InnerField extends PureComponent {
     static getDerivedStateFromProps(props, state){
         state.error = null;
         state.warning = null;
+        let changed = false;
 
         let error = props.validate(state.value);
         if(isString(error)){
             state.error = error;
+            changed = "error"
         } else if(isObject(error)){
             if(error.error){
                 state.error = error.error;
+                changed = "error"
             }
             if(error.warning){
                 state.warning = error.warning;
+                changed = "warning"
             }
         }
 
         if(props.name !== state.name){
             state.name = props.name;
+        }
+
+        if(changed){
+            props.form.fieldChanged({...state}, "validation")
         }
 
         return state;

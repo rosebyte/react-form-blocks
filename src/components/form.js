@@ -6,30 +6,36 @@ export const FormContext = React.createContext({});
 
 export default class Form extends Component {
     fields = this.props.fields || {};
-    peerChangeHandlers = {};
+    valueHandlers = {};
+    errorHandlers = {};
     state = {
         working: false,
         submitted: false
     };
 
-    fieldChanged = field => {
-        forEachProperty(this.peerChangeHandlers, (f, p) => {if(p !== field.name){f(field.name)}});
+    fieldChanged = (field, type = "value") => {
+        if(type === "value"){
+            forEachProperty(this.valueHandlers, (f, p) => {if(p !== field.name){f(field.name)}});
+        } else if(type === "validation"){
+            forEachProperty(this.errorHandlers, (f, p) => {if(p === field.name){f(field.name)}});
+        }
+
         this.props.onChange(this.fields)
     };
 
     register = (facade, peerChangeHandler, type = "field") => {
         if(type === "field"){
             this.fields[facade.name] = facade;
-            this.peerChangeHandlers[facade.name] = peerChangeHandler;
+            this.valueHandlers[facade.name] = peerChangeHandler;
         } else if(type === "message"){
-            this.peerChangeHandlers[facade.name + "_message"] = peerChangeHandler;
+            this.errorHandlers[facade.name] = peerChangeHandler;
         }
     };
 
     unregister = (facade) => {
         delete this.fields[facade.name];
-        delete this.peerChangeHandlers[facade.name];
-        delete this.peerChangeHandlers[facade.name + "_message"];
+        delete this.valueHandlers[facade.name];
+        delete this.errorHandlers[facade.name];
     };
 
     submit = (name, setSubmitted) => {
