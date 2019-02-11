@@ -4,8 +4,12 @@ import withForm from "../helpers/with-form";
 import renderElement from "../helpers/render-element";
 
 export const LEVELS = {
-    touched: 0,
-    changed: 1
+    allways: 0,
+    changed: 1,
+    dirty: 2,
+    touched: 3,
+    submitted: 4,
+    never: 5
 };
 
 class Message extends PureComponent {
@@ -24,18 +28,21 @@ class Message extends PureComponent {
     };
 
     render() {
-        const {name, level = LEVELS.touched, ...rest} = this.props;
+        const {name, level = LEVELS.touched, hide, ...rest} = this.props;
         const field = this.props.form.fields[name];
+        const submitted = this.props.form.submitted;
 
-        if(this.props.hide || !field || (!field.error && !field.warning)){
-            return null;
-        }
+        if(!field){return null;}
+        if(!field.error && !field.warning){return null;}
+        if(level === LEVELS.never || hide){return null;}
+        if(level === LEVELS.submitted && !submitted){return null;}
+        if(level === LEVELS.touched && !field.touched && !submitted){return null;}
+        if(level === LEVELS.dirty && !field.dirty){return null;}
+        if(level === LEVELS.changed && !field.dirty && !field.touched && !submitted){return null;}
 
-        if(!this.props.form.submitted && !field.touched && level === LEVELS.touched){
-            return null;
-        }
-
-        const content = {error: field.error, warning: field.warning};
+        const content = {};
+        if(field.error){content.error = field.error}
+        if(field.warning){content.warning = field.warning}
 
         return renderElement(content, rest);
     }
@@ -51,13 +58,12 @@ Message.propTypes = {
     form: PropTypes.shape({
         fields: PropTypes.object,
         submitted: PropTypes.bool
-    })
+    }).isRequired
 };
 
 Message.defaultProps = {
     level: LEVELS.touched,
-    hide: false,
-    form: {}
+    hide: false
 };
 
 export default withForm(Message);

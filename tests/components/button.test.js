@@ -3,7 +3,7 @@ import {configure, mount} from "enzyme"
 import Adapter from 'enzyme-adapter-react-16';
 import Form from "../../src/components/form";
 import Button from "../../src/components/button";
-import TestButtonController from "./test-objects/test-button-controller"
+import TestButtonController from "../test-objects/test-button-controller"
 
 configure({adapter: new Adapter()});
 
