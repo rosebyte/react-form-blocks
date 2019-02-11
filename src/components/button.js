@@ -5,24 +5,27 @@ import {isString, preventDefault} from "../helpers/utils";
 import renderElement from "../helpers/render-element";
 
 class Button extends React.Component {
-    handleClick = (event) => {
+    handleClick = event => {
         preventDefault(event);
         this.props.form.submit(this.props.name, this.props.setSubmitted);
         this.props.onClick(event);
     };
 
     render() {
-        let {form, type, disabled, value, hide, children, ...rest} = this.props;
+        let {form, type, disabled, value, hide, children, name, ...rest} = this.props;
         delete rest.setSubmitted;
+        delete rest.onClick;
 
         const field = {
             disabled: disabled !== null ? disabled : form.working,
             type: type,
             value: !value && isString(children) ? children : value,
-            onClick: this.handleClick
+            onClick: this.handleClick,
+            name: name
         };
 
-        return hide ? null : renderElement(field, {...rest, children})
+        let result = hide ? null : renderElement(field, {...rest, children});
+        return result;
     }
 }
 

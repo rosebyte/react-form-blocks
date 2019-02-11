@@ -5,8 +5,10 @@ import Button from "../../src/components/button";
 
 class TestButtonController extends PureComponent {
     render() {
+        const {name, onClick} = this.props;
+
         return (
-            <Button component={TestButtonMarkup} value="test title"/>
+            <Button component={TestButtonMarkup} value="test title" name={name} onClick={onClick}/>
         )
     }
 }

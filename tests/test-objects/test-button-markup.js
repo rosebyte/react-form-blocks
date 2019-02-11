@@ -4,9 +4,9 @@ import withForm from "../../src/helpers/with-form";
 
 class TestButtonMarkup extends PureComponent {
     render() {
-        const {value} = this.props;
+        const {value, onClick, name} = this.props;
         return (
-            <button type="submit">{value}</button>
+            <button type="submit" onClick={onClick} name={name}>{value}</button>
         )
     }
 }
