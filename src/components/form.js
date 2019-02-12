@@ -24,7 +24,11 @@ export default class Form extends Component {
             forEachProperty(this.errorHandlers, (f, p) => {if(p === field.name){f(field.name)}});
         }
 
-        this.props.onChange(this.fields)
+        this.props.onChange({
+            fields: this.fields,
+            working: this.state.working,
+            submitted: this.state.submitted
+        })
     };
 
     register = (facade, peerChangeHandler, type) => {
@@ -44,28 +48,40 @@ export default class Form extends Component {
 
     submit = (name, setSubmitted) => {
         this.setState({...this.state, working: true}, () =>{
+            this.props.onChange({
+                fields: this.fields,
+                working: this.state.working,
+                submitted: this.state.submitted
+            });
             checkActiveElement(document);
             this.props.onSubmit(this.fields, !anyFieldContainsError(this.fields), name);
             const submitted = this.state.submitted || setSubmitted;
-            this.setState({...this.state, submitted, working: false});
+            this.setState({...this.state, submitted, working: false}, () =>{
+                this.props.onChange({
+                    fields: this.fields,
+                    working: this.state.working,
+                    submitted: this.state.submitted
+                });
+            });
         });
     };
 
     handleSubmit = (event) => {
         preventDefault(event);
         const target = event.target || event.srcElement;
-        this.submit(target ? target.name : null, true);
+        this.submit(target ? target.name || null : null, true);
     };
 
     get facade(){
+        const self = this;
         return {
-            register: this.register,
-            unregister: this.unregister,
-            submit: this.submit,
-            fieldChanged: this.fieldChanged,
-            working: this.state.working,
-            submitted: this.state.submitted,
-            fields: this.fields
+            register: self.register,
+            unregister: self.unregister,
+            submit: self.submit,
+            fieldChanged: self.fieldChanged,
+            get working(){return self.state.working},
+            get submitted() {return self.state.submitted},
+            get fields() {return self.fields}
         }
     }
 
