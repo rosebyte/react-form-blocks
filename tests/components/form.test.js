@@ -161,7 +161,7 @@ describe("Form tests", () => {
 
         const sut = (
             <Form fields={testfields}>
-                <Button id="name"/>
+                <Button value="name"/>
             </Form>
         );
         const wrapper = mount(sut);
@@ -192,7 +192,7 @@ describe("Form tests", () => {
             expect(wrapper.find("button").parent().prop("form").working).toBeTruthy();
         }
 
-        const wrapper = mount(<Form onSubmit={handleSubmit}><Button id="name"/></Form>);
+        const wrapper = mount(<Form onSubmit={handleSubmit}><Button value="name"/></Form>);
         expect(wrapper.find("button").parent().prop("form").working).toBeFalsy();
 
         wrapper.simulate("submit");
@@ -205,7 +205,7 @@ describe("Form tests", () => {
 
     it("should pass own methods to context", done => {
         const element = (
-            <Form><Button id="name"/></Form>
+            <Form><Button value="name"/></Form>
         );
         const wrapper = mount(element);
         const form = wrapper.find("button").parent().prop("form");
@@ -245,7 +245,7 @@ describe("Form tests", () => {
 
     it("should pass submitted to context", done => {
         const element = (
-            <Form><Button id={name}/></Form>
+            <Form><Button value={name}/></Form>
         );
         const wrapper = mount(element);
         expect(wrapper.find("button").parent().prop("form").submitted).toBeFalsy();
@@ -263,7 +263,7 @@ describe("Form tests", () => {
         let result2 = {};
 
         const element = (
-            <Form><Button id={name}/></Form>
+            <Form><Button value={name}/></Form>
         );
         const wrapper = mount(element);
         const form = wrapper.instance();
@@ -278,19 +278,19 @@ describe("Form tests", () => {
             b:(() => result2.b = true)
         };
 
-        const a = {name: "a"};
+        const a = {name: "a", value:"A"};
 
-        form.fieldChanged(a, ELEMENTS.FIELD);
+        form.fieldChanged(a, {name: "a", value:"B"});
 
         expect(result.a).toBeUndefined();
-        expect(result.b).toBe("a");
+        expect(result.b.name).toBe("a");
         expect(result2.a).toBeUndefined();
         expect(result2.b).toBeUndefined();
 
         result = {};
         result2 = {};
 
-        form.fieldChanged({name: "b"}, ELEMENTS.MESSAGE);
+        form.fieldChanged({name: "b", message: "A"}, {name: "b", message: "B"});
 
         expect(result.a).toBeUndefined();
         expect(result.b).toBeUndefined();
@@ -328,18 +328,12 @@ describe("Form tests", () => {
         const wrapper = mount(sut);
         wrapper.find("input").simulate("change", {target:{value:"aa"}});
 
-        expect(changes.length).toBe(2);
+        expect(changes.length).toBe(1);
         expect(changes[0].fields["myTestField"].value).toBe("aa");
         expect(changes[0].working).not.toBeNull();
         expect(changes[0].working).toBe(false);
         expect(changes[0].submitted).not.toBeNull();
         expect(changes[0].submitted).toBe(false);
-
-        expect(changes[1].fields["myTestField"].message).toBe("aa");
-        expect(changes[1].working).not.toBeNull();
-        expect(changes[1].working).toBe(false);
-        expect(changes[1].submitted).not.toBeNull();
-        expect(changes[1].submitted).toBe(false);
     });
 
     it("should emit on Changes when submitting", done => {

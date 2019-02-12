@@ -17,11 +17,13 @@ export default class Form extends Component {
         submitted: false
     };
 
-    fieldChanged = (field, type) => {
-        if(type === ELEMENTS.FIELD){
-            forEachProperty(this.valueHandlers, (f, p) => {if(p !== field.name){f(field.name)}});
-        } else if(type === ELEMENTS.MESSAGE){
-            forEachProperty(this.errorHandlers, (f, p) => {if(p === field.name){f(field.name)}});
+    fieldChanged = (current, previous) => {
+        if(current.value !== previous.value){
+            forEachProperty(this.valueHandlers, (f, p) => {if(p !== current.name){f(current)}});
+        }
+
+        if(current.message !== previous.message){
+            forEachProperty(this.errorHandlers, (f, p) => {if(p === current.name){f()}});
         }
 
         this.props.onChange({

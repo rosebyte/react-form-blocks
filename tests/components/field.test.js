@@ -23,11 +23,28 @@ describe("Field tests", () =>{
         expect(wrapper.find("input").prop("value")).toBe(testValue);
     });
 
+    it('should extract value', () => {
+        const testValue = "testValue";
+        const wrapper = mount(
+            <Form><Field name="test" extractValue={event => event.myValue.first} /></Form>
+        );
+        wrapper.find("input").simulate("change", {myValue:{first: testValue}});
+        expect(wrapper.instance().fields.test.value).toBe(testValue);
+    });
+
     it('should render the component with name', () => {
         const testValue = "testValue";
         const element = <Form><Field name={testValue}/></Form>;
         const wrapper = mount(element);
         expect(wrapper.find("input").prop("name")).toBe(testValue);
+    });
+
+    it('should register component after mount', () => {
+        const testValue = "testValue";
+        const element = <Form><Field name={testValue}/></Form>;
+        const wrapper = mount(element);
+        expect(wrapper.instance().fields[testValue]).not.toBeUndefined();
+        expect(wrapper.instance().valueHandlers[testValue]).not.toBeUndefined();
     });
 
     it('should render radio component with default value', () => {
@@ -62,6 +79,44 @@ describe("Field tests", () =>{
         const wrapper = mount(element);
         wrapper.find("input").simulate("blur", {target:{value: newValue}});
         expect(testValue).toBe(newValue);
+    });
+
+    it("shouldn't be dirty after blur", () => {
+        let testValue = "";
+        const newValue = "test";
+        const element = <Form><Field name="test" onBlur={e => testValue = e.target.value} /></Form>;
+        const wrapper = mount(element);
+        wrapper.find("input").simulate("change", {target:{value: newValue}});
+        expect(wrapper.instance().fields.test.dirty).toBeTruthy();
+
+        wrapper.find("input").simulate("blur", {target:{value: newValue}});
+
+        expect(wrapper.instance().fields.test.dirty).toBeFalsy();
+    });
+
+    it("should be touched after blur", () => {
+        let testValue = "";
+        const newValue = "test";
+        const element = <Form><Field name="test" onBlur={e => testValue = e.target.value} /></Form>;
+        const wrapper = mount(element);
+        expect(wrapper.instance().fields.test.touched).toBeFalsy();
+
+        wrapper.find("input").simulate("blur", {target:{value: newValue}});
+
+        expect(wrapper.instance().fields.test.touched).toBeTruthy();
+    });
+
+    it("should be dirty after change", () => {
+        let testValue = "";
+        const newValue = "test";
+        const element = <Form><Field name="test" onBlur={e => testValue = e.target.value} /></Form>;
+        const wrapper = mount(element);
+
+        expect(wrapper.instance().fields.test.dirty).toBeFalsy();
+
+        wrapper.find("input").simulate("change", {target:{value: newValue}});
+
+        expect(wrapper.instance().fields.test.dirty).toBeTruthy();
     });
 
     it('should run children function', () => {
@@ -112,6 +167,24 @@ describe("FormField tests", () => {
         expect(watcherValue).toBe(value + "!");
     });
 
+    it("should ignore non-watched field's change", () => {
+        const value = "I'm changed now!";
+        let syncMethodWasInvoked = false;
+        const element = (
+            <Form>
+                <Field className="first" name="watched"/>
+                <Field className="second"
+                       name="watcher"
+                       value="A"
+                       sync={() => syncMethodWasInvoked = true} />
+            </Form>
+        );
+        const wrapper = mount(element);
+        const input = wrapper.find("input.first");
+        input.simulate("change", {target:{value}});
+        expect(syncMethodWasInvoked).toBeFalsy();
+    });
+
     it('should reflect own change via edit', () => {
         let fields = {name: {value: "value", error: "error", warning: "warning"}};
         let newValue = null;
@@ -135,7 +208,21 @@ describe("FormField tests", () => {
         expect(wrapper.find("input").at(0).props().value).toBe("edited")
     });
 
-    it("shouldn use outer element", () => {
+    it("should not change state if value doesn't change", () => {
+        let changes = [];
+        let edit = currentVal => currentVal;
+
+        const sut = (
+            <Form>
+                <Field value="value" name="name" edit={edit} onChange={x => changes.push(x)} />
+            </Form>
+        );
+        const wrapper = mount(sut);
+        wrapper.find("input").simulate("change", {target:{value: "changed"}});
+        expect(changes.length).toBe(0);
+    });
+
+    it("should use outer element", () => {
         const value = "I'm changed now!";
         const element = (
             <Form>
@@ -165,7 +252,25 @@ describe("FormField tests", () => {
         );
         const wrapper = mount(sut);
         wrapper.find("input").simulate("change", {target:{value: "changed"}});
-        expect(state.name.message).toBe("Error: changed");
+        expect(state.fields.name.message).toBe("Error: changed");
+    });
+
+    it('should emit change after change', () => {
+        let changes = [];
+        let validate = value => "Error: " + value;
+        const sut = (
+            <Form>
+                <Field value="value" name="name" validate={validate}
+                       onChange={(current, previous) => changes.push({current, previous})} />
+            </Form>
+        );
+        const wrapper = mount(sut);
+        wrapper.find("input").simulate("change", {target:{value: "changed"}});
+        expect(changes.length).toBe(1);
+        expect(changes[0].current.message).toBe("Error: changed");
+        expect(changes[0].previous.message).toBe("Error: value");
+        expect(changes[0].current.value).toBe("changed");
+        expect(changes[0].previous.value).toBe("value");
     });
 });
 

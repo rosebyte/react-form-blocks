@@ -25,8 +25,8 @@ class InnerField extends PureComponent {
         }
     })();
 
-    handlePeerChange = (fieldName) => {
-        if(this.props.watch.indexOf(fieldName) > -1){
+    handlePeerChange = (field) => {
+        if(this.props.watch.indexOf(field.name) > -1){
             let synced = this.props.sync(this.props.form.fields, this.facade);
             if(synced !== this.value){
                 this.setState({...this.state, value: synced});
@@ -45,7 +45,7 @@ class InnerField extends PureComponent {
     };
 
     extractValue = event => {
-        if(this.props.getValue){
+        if(this.props.extractValue){
             return this.props.extractValue(event);
         }
 
@@ -72,8 +72,8 @@ class InnerField extends PureComponent {
         }
 
         if(prevState !== this.state){
-            this.props.form.fieldChanged(this.facade, ELEMENTS.FIELD);
-            this.props.onChange({...this.state});
+            this.props.form.fieldChanged(this.state, prevState);
+            this.props.onChange(this.state, prevState);
         }
     }
 
@@ -81,7 +81,6 @@ class InnerField extends PureComponent {
         let message = props.validate(state.value, state.message) || null;
         if(message !== (state.message || null)){
             state.message = message;
-            props.form.fieldChanged(state, ELEMENTS.MESSAGE)
         }
 
         if(props.name !== state.name){
