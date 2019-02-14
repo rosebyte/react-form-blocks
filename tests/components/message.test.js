@@ -25,9 +25,22 @@ function Message(props){
 }
 
 it("should pass message", () => {
-    const dom = mount(<Message level={LEVELS.always} />);
-
+    const dom = mount(<Message level={LEVELS.always} value={VALUE} />);
     expect(dom.find(REF).text()).toBe(VALUE);
+});
+
+it('should validate using string after change', () => {
+    let state = null;
+    let validate = field => "Error: " + field.value;
+    const sut = (
+        <Form>
+            <TestFieldController value={VALUE} name={NAME}/>
+            <TestMessageController name={NAME} validate={validate} onChange={x => state = x} />
+        </Form>
+    );
+    const wrapper = mount(sut);
+    wrapper.find("input").simulate("change", {target:{value: "changed"}});
+    expect(state.value).toBe("Error: changed");
 });
 
 it("shouldn't pass empty message", () => {
@@ -41,35 +54,20 @@ it("shouldn't pass empty message", () => {
     expect(dom.find(REF).exists()).toBeFalsy();
 });
 
-it("should react on field's message change", done => {
-    const validate = value => "This is error: " + value;
-    const element = (
-        <Form>
-            <TestFieldController validate={validate} name={NAME}/>
-            <TestMessageController name={NAME} level={LEVELS.always} />
-        </Form>
-    );
-
-    const wrapper = mount(element);
-
-    wrapper.find("input").simulate("change", {target:{value: "change"}});
-    setImmediate(() => {
-        expect(wrapper.find(".error").text()).toBe("This is error: change");
-        done();
-    });
-});
-
 it("should work in components hierarchy", () => {
     const element = (
         <Form fields={{test:{message: VALUE, touched: true}}}>
-            <TestMessageController name={NAME} />
+            <TestFieldController value="test" name={NAME} />
+            <TestMessageController validate={x => "Error: " + x.value}
+                                   name={NAME}
+                                   level={LEVELS.always} />
         </Form>
     );
 
     const wrapper = mount(element);
-
-    expect(wrapper.find(".error").text()).toBe(VALUE);
-    expect(wrapper.find(".title").text()).toBe("test title");
+    wrapper.find("input").simulate("change", {target:{value: "changed"}});
+    let html = wrapper.html();
+    expect(wrapper.find(".error").text()).toBe("Error: changed");
 });
 
 it("should be hidden with hide prop", () => {
@@ -86,7 +84,7 @@ describe("message level tests", () => {
     });
 
     it("should show submitted level when submitted", () => {
-        const props = {level: LEVELS.submitted, context: {submitted: true}};
+        const props = {level: LEVELS.submitted, value: VALUE, context: {submitted: true}};
 
         const dom = mount(<Message {...props} />);
 
@@ -94,7 +92,7 @@ describe("message level tests", () => {
     });
 
     it("should show always level even when not submitted, touched, dirty", () => {
-        const props = {level: LEVELS.always};
+        const props = {level: LEVELS.always, value: VALUE};
 
         const dom = mount(<Message {...props} />);
 
@@ -121,7 +119,8 @@ describe("message level tests", () => {
     it("should show when touched level and touched", () => {
         const props = {
             level: LEVELS.touched,
-            context: {fields: {test:{touched: true}}}
+            context: {fields: {test:{touched: true}}},
+            value: VALUE
         };
 
         const dom = mount(<Message {...props} />);
@@ -132,7 +131,8 @@ describe("message level tests", () => {
     it("should show when touched level and submitted", () => {
         const props = {
             level: LEVELS.touched,
-            context: {submitted: true}
+            context: {submitted: true},
+            value: VALUE
         };
 
         const dom = mount(<Message {...props} />);
@@ -149,7 +149,8 @@ describe("message level tests", () => {
     it("should show when dirty level and dirty", () => {
         const props = {
             level: LEVELS.dirty,
-            context: {fields: {test:{dirty: true}}}
+            context: {fields: {test:{dirty: true}}},
+            value: VALUE
         };
 
         const dom = mount(<Message {...props} />);
@@ -166,7 +167,8 @@ describe("message level tests", () => {
     it("should show when changed level and dirty", () => {
         const props = {
             level: LEVELS.changed,
-            context: {fields: {test:{dirty: true}}}
+            context: {fields: {test:{dirty: true}}},
+            value: VALUE
         };
 
         const dom = mount(<Message {...props} />);
@@ -177,7 +179,8 @@ describe("message level tests", () => {
     it("should show when changed level and touched", () => {
         const props = {
             level: LEVELS.changed,
-            context: {fields: {test:{touched: true}}}
+            context: {fields: {test:{touched: true}}},
+            value: VALUE
         };
 
         const dom = mount(<Message {...props} />);
@@ -186,7 +189,7 @@ describe("message level tests", () => {
     });
 
     it("should show when changed level and submitted", () => {
-        const props = {level: LEVELS.changed, context: {submitted: true}};
+        const props = {level: LEVELS.changed, context: {submitted: true}, value: VALUE};
 
         const dom = mount(<Message {...props} />);
 

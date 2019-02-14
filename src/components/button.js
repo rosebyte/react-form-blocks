@@ -7,7 +7,9 @@ import renderElement from "../helpers/render-element";
 class Button extends React.Component {
     handleClick = event => {
         preventDefault(event);
-        this.props.form.submit(this.props.name, this.props.setSubmitted);
+        if(this.props.form.onSubmit){
+            this.props.form.onSubmit(this.props.name, this.props.setSubmitted);
+        }
         this.props.onClick(event);
     };
 
@@ -17,15 +19,14 @@ class Button extends React.Component {
         delete rest.onClick;
 
         const field = {
-            disabled: disabled !== null ? disabled : form.working,
+            disabled: disabled !== null ? disabled : form ? form.working : false,
             type: type,
             value: !value && isString(children) ? children : value,
             onClick: this.handleClick,
             name: name
         };
 
-        let result = hide ? null : renderElement(field, {...rest, children});
-        return result;
+        return hide ? null : renderElement(field, {...rest, children});
     }
 }
 
@@ -35,12 +36,11 @@ Button.defaultProps = {
     setSubmitted: true,
     type: "submit",
     component: "button",
-    onClick: () => {},
-    form: {}
+    onClick: () => {}
 };
 
 Button.propTypes = {
-    value: PropTypes.string.isRequired,
+    value: PropTypes.string,
     disabled: PropTypes.bool,
     hide: PropTypes.bool,
     render: PropTypes.func,
@@ -51,8 +51,8 @@ Button.propTypes = {
     type: PropTypes.string,
     name: PropTypes.string,
     form: PropTypes.shape({
-        working: PropTypes.bool,
-        submit: PropTypes.func
+        working: PropTypes.bool.isRequired,
+        onSubmit: PropTypes.func.isRequired
     }).isRequired
 };
 

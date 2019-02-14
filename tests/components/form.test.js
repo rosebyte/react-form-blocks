@@ -1,10 +1,11 @@
 import React from "react"
-import Form from "../../src/components/form"
+import Form, {ELEMENTS} from "../../src/components/form"
 import {configure, mount} from "enzyme"
 import Field from "../../src/components/field";
 import Button from "../../src/components/button";
 import Adapter from 'enzyme-adapter-react-16';
 import TestMessageController from "../test-objects/test-message-controller";
+import {LEVELS} from "../../src/components/message";
 
 configure({adapter: new Adapter()});
 
@@ -37,7 +38,7 @@ describe("Form tests", () => {
         expect(wrapper.instance().fields["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().valueHandlers["firstField"]).not.toBeUndefined();
 
-        wrapper.instance().unregister({name: "firstField"});
+        wrapper.instance().unregister({name: "firstField", type: ELEMENTS.FIELD});
 
         expect(wrapper.instance().fields["firstField"]).toBeUndefined();
         expect(wrapper.instance().valueHandlers["firstField"]).toBeUndefined();
@@ -51,10 +52,12 @@ describe("Form tests", () => {
         );
         const wrapper = mount(sut);
 
+        expect(wrapper.instance().messages["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().errorHandlers["firstField"]).not.toBeUndefined();
 
-        wrapper.instance().unregister({name: "firstField"});
+        wrapper.instance().unregister({name: "firstField", type: ELEMENTS.MESSAGE});
 
+        expect(wrapper.instance().messages["firstField"]).toBeUndefined();
         expect(wrapper.instance().errorHandlers["firstField"]).toBeUndefined();
     });
 
@@ -72,7 +75,9 @@ describe("Form tests", () => {
         expect(wrapper.instance().valueHandlers["firstField"]).toBeUndefined();
         expect(wrapper.instance().valueHandlers["secondField"]).toBeUndefined();
         expect(wrapper.instance().errorHandlers["firstField"]).not.toBeUndefined();
+        expect(wrapper.instance().messages["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().errorHandlers["secondField"]).not.toBeUndefined();
+        expect(wrapper.instance().messages["secondField"]).not.toBeUndefined();
     });
 
     it('should render field', () => {
@@ -126,31 +131,6 @@ describe("Form tests", () => {
         const wrapper = mount(sut);
         wrapper.find("input").at(0).simulate("change", {target:{value: "changed"}});
         expect(wrapper.find("input").at(1).props().value).toBe("Watched: changed")
-    });
-
-    it('should validate after sync', () => {
-        let testfields = {
-            name: {value: "value1", error: "error1", warning: "warning1"},
-            surname: {value: "value2", error: "error2", warning: "warning2"},
-        };
-
-        const sut = (
-            <Form fields={testfields}>
-                <Field name="name"/>
-                <Field name="surname"
-                       watch={["name"]}
-                       sync={fields => "Watched: " + fields.name.value}
-                       validate={value => {
-                           if (value === "Watched: changed"){
-                               return "this works!"
-                           }
-                       }}/>
-            </Form>
-        );
-        const wrapper = mount(sut);
-        wrapper.find("input").at(0).simulate("change", {target:{value: "changed"}});
-        const second = wrapper.find("input").at(1).parent().prop("form").fields.surname.message;
-        expect(second).toBe("this works!")
     });
 
     it('should pass fields to context', () => {
@@ -211,8 +191,8 @@ describe("Form tests", () => {
         const form = wrapper.find("button").parent().prop("form");
         expect(form.register).not.toBeUndefined();
         expect(form.unregister).not.toBeUndefined();
-        expect(form.submit).not.toBeUndefined();
-        expect(form.fieldChanged).not.toBeUndefined();
+        expect(form.onSubmit).not.toBeUndefined();
+        expect(form.onChange).not.toBeUndefined();
 
         wrapper.simulate("submit");
 
@@ -280,21 +260,11 @@ describe("Form tests", () => {
 
         const a = {name: "a", value:"A"};
 
-        form.fieldChanged(a, {name: "a", value:"B"});
+        form.onChange(a, {name: "a", value:"B"});
 
         expect(result.a).toBeUndefined();
         expect(result.b.name).toBe("a");
-        expect(result2.a).toBeUndefined();
-        expect(result2.b).toBeUndefined();
-
-        result = {};
-        result2 = {};
-
-        form.fieldChanged({name: "b", message: "A"}, {name: "b", message: "B"});
-
-        expect(result.a).toBeUndefined();
-        expect(result.b).toBeUndefined();
-        expect(result2.a).toBeUndefined();
+        expect(result2.a).toBeTruthy();
         expect(result2.b).toBeTruthy();
     });
 
@@ -347,13 +317,6 @@ describe("Form tests", () => {
 
         setImmediate(() => {
             expect(changes.length).toBe(2);
-            expect(changes[0].fields).toBe(fields);
-            expect(changes[1].fields).toBe(fields);
-            expect(changes[0].working).toBe(true);
-            expect(changes[1].working).toBe(false);
-            expect(changes[0].submitted).toBe(false);
-            expect(changes[1].submitted).toBe(true);
-
             done();
         });
     });

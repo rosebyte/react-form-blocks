@@ -1,14 +1,13 @@
-import React, { PureComponent } from 'react';
-import {getEventValue, isCheckable, preventDefault} from "../helpers/utils"
+import React from 'react';
+import {getEventValue, preventDefault} from "../helpers/utils"
 import PropTypes from "prop-types"
 import withForm from "../helpers/with-form";
 import {ELEMENTS} from "./form";
 import renderElement from "../helpers/render-element";
 
-class InnerField extends PureComponent {
+class Field extends React.Component {
     name = this.props.name;
     state = {
-        message: null,
         touched: false,
         dirty: false,
         value: this.props.value
@@ -17,15 +16,15 @@ class InnerField extends PureComponent {
     facade = (() => {
         const self = this;
         return {
+            type: ELEMENTS.FIELD,
             get name(){return self.name;},
-            get message(){return self.state.message;},
             get touched(){return self.state.touched;},
             get dirty(){return self.state.dirty;},
             get value(){return self.state.value;},
         }
     })();
 
-    handlePeerChange = (field) => {
+    handlePeerChange = field => {
         if(this.props.watch.indexOf(field.name) > -1){
             let synced = this.props.sync(this.props.form.fields, this.facade);
             if(synced !== this.value){
@@ -34,13 +33,11 @@ class InnerField extends PureComponent {
         }
     };
 
-    handleBlur = (event) => {
+    handleBlur = event => {
         preventDefault(event);
-
         if(this.dirty || !this.touched){
             this.setState({...this.state, touched: true, dirty: false});
         }
-
         this.props.onBlur(event);
     };
 
@@ -48,7 +45,6 @@ class InnerField extends PureComponent {
         if(this.props.extractValue){
             return this.props.extractValue(event);
         }
-
         return getEventValue(event, this.props.type);
     };
 
@@ -62,7 +58,7 @@ class InnerField extends PureComponent {
     };
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.handlePeerChange, ELEMENTS.FIELD);
+        this.props.form.register(this.facade, this.handlePeerChange);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -72,95 +68,84 @@ class InnerField extends PureComponent {
         }
 
         if(prevState !== this.state){
-            this.props.form.fieldChanged(this.state, prevState);
-            this.props.onChange(this.state, prevState);
+            this.props.form.onChange(this.facade);
+            this.props.onChange(this.facade);
         }
-    }
-
-    static getDerivedStateFromProps(props, state){
-        let message = props.validate(state.value, state.message) || null;
-        if(message !== (state.message || null)){
-            state.message = message;
-        }
-
-        if(props.name !== state.name){
-            state.name = props.name;
-        }
-
-        return state;
     }
 
     componentWillUnmount(){
-        this.props.form.unregister(this.name, ELEMENTS.FIELD);
+        this.props.form.unregister(this.facade);
     }
 
     render() {
-        let {name, disabled, hide, form, noValue, noBlur, ...props} = this.props;
+        let {name, disabled, hide, form, noValue, valueName, ...rest} = this.props;
 
-        delete props.value;
-        delete props.type;
-        delete props.watch;
-        delete props.validate;
-        delete props.onChange;
-        delete props.onBlur;
-        delete props.edit;
-        delete props.sync;
-        delete props.extractValue;
+        delete rest.value;
+        delete rest.watch;
+        delete rest.validate;
+        delete rest.onChange;
+        delete rest.onBlur;
+        delete rest.edit;
+        delete rest.sync;
+        delete rest.extractValue;
+        delete rest.value;
 
-        props.component = props.component || "input";
+        if(!rest.component && !rest.render && !rest.children){
+            rest["component"] = "input";
+            rest["type"] = rest.type || "text";
+        }
 
         const field = {
             name,
             onChange: this.handleChange,
-            disabled: disabled != null ? disabled : form.working
+            disabled: disabled != null ? disabled : form.working,
+            onBlur: this.handleBlur
         };
 
-        if(!noBlur){
-            field.onBlur = this.handleBlur
-        }
-
         if(!noValue){
-            if(isCheckable(this.props.type)){
-                field.checked = this.state.value || false;
-            }
-            else{
-                field.value = this.state.value || "";
-            }
+            field[valueName] = this.state.value || "";
         }
 
-        return hide ? null : renderElement(field, props);
+        return hide ? null : renderElement(field, rest);
     }
 }
 
-InnerField.propTypes = {
-    form: PropTypes.object.isRequired,
+Field.propTypes = {
     name: PropTypes.string.isRequired,
     render: PropTypes.func,
-    children: PropTypes.func,
+    children: PropTypes.any,
     component: PropTypes.any,
     onChange: PropTypes.func,
     onBlur: PropTypes.func,
-    noBlur: PropTypes.bool,
     value: PropTypes.any,
     noValue: PropTypes.bool,
+    valueName: PropTypes.string,
     extractValue: PropTypes.func,
-    validate: PropTypes.func,
     edit: PropTypes.func,
     sync: PropTypes.func,
     watch: PropTypes.array,
-    hide: PropTypes.bool
+    type: PropTypes.string,
+    hide: PropTypes.bool,
+    disabled: PropTypes.bool,
+    form: PropTypes.shape({
+        fields: PropTypes.object.isRequired,
+        onChange: PropTypes.func.isRequired,
+        register: PropTypes.func.isRequired,
+        unregister: PropTypes.func.isRequired,
+    }).isRequired
 };
 
-InnerField.defaultProps = {
+Field.defaultProps = {
     onBlur: () => {},
     onChange: () => {},
     validate: () => {},
+    noValue: false,
     value: null,
+    valueName: "value",
     hide: false,
-    type: "text",
     watch: [],
     edit: (oldVal, newVal) => newVal,
     sync: (fields, field) => field.value
 };
 
-export default withForm(InnerField)
+export default withForm(Field)

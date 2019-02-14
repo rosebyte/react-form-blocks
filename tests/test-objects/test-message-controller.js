@@ -9,7 +9,9 @@ export default class TestMessageController extends PureComponent {
             <Message name={this.props.name}
                      component={TestMessageMarkup}
                      level={this.props.level}
-                     title="test title"/>
+                     title="test title"
+                     validate={this.props.validate}
+                     onChange={this.props.onChange} />
         )
     }
 }

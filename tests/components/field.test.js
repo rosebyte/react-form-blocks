@@ -11,7 +11,7 @@ describe("Field tests", () =>{
     it('should render the component with defaults', () => {
         const wrapper = mount(<Form><Field name="test"/></Form>);
 
-        expect(wrapper.html()).toBe("<form><input name=\"test\" value=\"\"></form>");
+        expect(wrapper.html()).toBe('<form name="__form__"><input name="test" type="text" value=""></form>');
         expect(wrapper.find("input").prop("value")).toBe("");
     });
 
@@ -242,35 +242,19 @@ describe("FormField tests", () => {
         expect(watcherValue).toBe(value + "!");
     });
 
-    it('should validate using string after change', () => {
-        let state = null;
-        let validate = value => "Error: " + value;
-        const sut = (
-            <Form onChange={x => state = x}>
-                <Field value="value" name="name" validate={validate} />
-            </Form>
-        );
-        const wrapper = mount(sut);
-        wrapper.find("input").simulate("change", {target:{value: "changed"}});
-        expect(state.fields.name.message).toBe("Error: changed");
-    });
-
     it('should emit change after change', () => {
         let changes = [];
         let validate = value => "Error: " + value;
         const sut = (
             <Form>
                 <Field value="value" name="name" validate={validate}
-                       onChange={(current, previous) => changes.push({current, previous})} />
+                       onChange={facade => changes.push(facade)} />
             </Form>
         );
         const wrapper = mount(sut);
         wrapper.find("input").simulate("change", {target:{value: "changed"}});
         expect(changes.length).toBe(1);
-        expect(changes[0].current.message).toBe("Error: changed");
-        expect(changes[0].previous.message).toBe("Error: value");
-        expect(changes[0].current.value).toBe("changed");
-        expect(changes[0].previous.value).toBe("value");
+        expect(changes[0].value).toBe("changed");
     });
 });
 
