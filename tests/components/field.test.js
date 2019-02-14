@@ -11,7 +11,7 @@ describe("Field tests", () =>{
     it('should render the component with defaults', () => {
         const wrapper = mount(<Form><Field name="test"/></Form>);
 
-        expect(wrapper.html()).toBe('<form name="__form__"><input name="test" type="text" value=""></form>');
+        expect(wrapper.html()).toBe('<form><input name="test" type="text" value=""></form>');
         expect(wrapper.find("input").prop("value")).toBe("");
     });
 

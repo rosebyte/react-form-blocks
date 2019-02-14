@@ -14,10 +14,7 @@ export const LEVELS = {
 };
 
 class Message extends PureComponent {
-    state = {
-        value: this.props.value || null,
-        ran: false
-    };
+    state = {value: this.props.value || null, ran: false};
 
     facade = (() => {
         const self = this;
@@ -25,7 +22,7 @@ class Message extends PureComponent {
             type: ELEMENTS.MESSAGE,
             get name(){return self.props.name;},
             get value(){return self.state.value;},
-            get valid(){return self.check()}
+            get isValid(){return self.isValid}
         }
     })();
 
@@ -34,35 +31,23 @@ class Message extends PureComponent {
     }
 
     componentWillUnmount(){
-        this.props.form.unregister(this.props.name);
+        this.props.form.unregister(this.facade);
     }
 
-    check = () => {
-        if(!this.state.ran){
-            this.challenge()
-        }
-        if(this.props.check){
-            return this.props.check();
-        }
-
-        return !this.state.value;
+    get isValid() {
+        if(!this.state.ran){this.challenge()}
+        return this.props.check ? this.props.check() : !this.state.value;
     };
 
-    challenge = field => {
-        if(field.name !== this.props.name){
-            if(this.props.name || field.type !== ELEMENTS.FORM){
-                if(!this.props.watch || this.props.watch.indexOf(field.name) < 0){
-                    return;
-                }
-            }
-        }
-        const message = this.props.validate(field, this.props.form.fields);
+    challenge = () => {
+        const message = this.props.validate(this.props.form.fields);
         if(message !== this.state.value || !this.state.ran){
             this.setState({...this.state, value: message, ran: true})
         }
 
-        if(this.props.required && !field.value && field.type === ELEMENTS.FIELD){
-            if(this.state.value !== this.props.required){
+        if(this.props.required){
+            const field = this.props.form.fields[this.name];
+            if(field && !field.value && this.state.value !== this.props.required){
                 this.setState({...this.state, value: this.props.required, ran: true})
             }
         }
@@ -101,13 +86,15 @@ class Message extends PureComponent {
 }
 
 Message.propTypes = {
-    name: PropTypes.string,
+    name: PropTypes.string.isRequired,
     hide: PropTypes.bool,
     level: PropTypes.number,
     render: PropTypes.func,
     children: PropTypes.any,
     component: PropTypes.any,
     validate: PropTypes.func,
+    onChange: PropTypes.func,
+    required: PropTypes.string,
     watch: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
     form: PropTypes.shape({
         fields: PropTypes.object,
@@ -120,7 +107,6 @@ Message.defaultProps = {
     onChange: () => {},
     validate: () => {},
     hide: false,
-    name: "__form__",
     watch: []
 };
 

@@ -1,6 +1,6 @@
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import React, { Component } from 'react';
-import {FormContext} from "../components/form"
+import FormContext from "./context"
 
 export default function withForm(Component) {
     const wrapper = (props) => (

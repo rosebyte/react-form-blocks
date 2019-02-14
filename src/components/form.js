@@ -1,24 +1,53 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from "prop-types"
-import {checkActiveElement, forEachProperty, isString, preventDefault} from "../helpers/utils";
+import {any, isString, preventDefault} from "../helpers/utils";
+import warning from "tiny-warning";
+import FormContext from "../helpers/context"
 
-export const FormContext = React.createContext({});
 export const ELEMENTS = {
     FIELD: "field",
     MESSAGE: "message",
     FORM: "form"
 };
 
-export default class Form extends Component {
-    name = this.props.name;
-    message = null;
-    fields = this.props.fields || {};
-    messages = this.props.messages || {};
+export default class Form extends React.Component {
+    fields = {};
+    messages = {};
     handlers = {};
-    state = {
-        working: false,
-        submitted: false,
-    };
+    state = {working: false, submitted: false};
+
+    get initialValues(){return this.props.values}
+
+    get isValid() {return !any(this.messages, x => !x.isValid);};
+
+    get facade(){
+        const self = this;
+        return {
+            type: ELEMENTS.FORM,
+            get initialValues(){return self.initialValues},
+            get name(){return self.name},
+            get messages(){return self.messages},
+            get working(){return self.state.working},
+            get submitted() {return self.state.submitted},
+            get fields() {return self.fields},
+            get isValid() {return self.isValid}
+        }
+    }
+
+    get formContext(){
+        const self = this;
+        return {
+            register: self.register,
+            unregister: self.unregister,
+            onSubmit: self.onSubmit,
+            onChange: self.onChange,
+            get initialValues(){return self.initialValues},
+            get messages(){return self.messages},
+            get working(){return self.state.working},
+            get submitted() {return self.state.submitted},
+            get fields() {return self.fields}
+        }
+    }
 
     onChange = facade => {
         if(this.handlers[facade.name]){
@@ -79,63 +108,24 @@ export default class Form extends Component {
         }
     }
 
-    onSubmit = (name, setSubmitted) => {
+    onSubmit = (func, setSubmitted, onError) => {
         this.setState({...this.state, working: true}, () => {
-            checkActiveElement(document);
-            const error = this.props.onSubmit(this.fields, this.check(), name);
-            if((error || null) !== (this.message || null)){
-                this.message = error;
-                this.onChange(this.facade);
-            }
+            func(this.facade, onError);
             const submitted = this.state.submitted || setSubmitted;
             this.setState({...this.state, submitted, working: false});
         });
     };
 
-    check = () =>{
-        let ok = true;
-        forEachProperty(this.errorHandlers, f => {if(!f.check()){ok = false;}});
-        return ok;
-    };
-
     handleSubmit = (event) => {
         preventDefault(event);
-        const target = event.target || event.srcElement;
-        this.onSubmit(target ? target.name || null : null, true);
+        warning("Don't use submit event, use form button click instead.")
     };
-
-    get facade(){
-        const self = this;
-        return {
-            type: ELEMENTS.FORM,
-            get name(){return self.name},
-            get message(){return this.message},
-            get messages(){return this.messages},
-            get working(){return self.state.working},
-            get submitted() {return self.state.submitted},
-            get fields() {return self.fields}
-        }
-    }
-
-    get formContext(){
-        const self = this;
-        return {
-            type: ELEMENTS.FORM,
-            register: self.register,
-            unregister: self.unregister,
-            onSubmit: self.onSubmit,
-            onChange: self.onChange,
-            get name(){return self.name},
-            get working(){return self.state.working},
-            get submitted() {return self.state.submitted},
-            get fields() {return self.fields}
-        }
-    }
 
     render() {
         const {children, ...rest} = this.props;
         delete rest.onChange;
         delete rest.onSubmit;
+        delete rest.values;
 
         return (
             <FormContext.Provider value={this.formContext}>
@@ -148,11 +138,11 @@ export default class Form extends Component {
 Form.defaultProps = {
     onSubmit: () => {},
     onChange: () => {},
-    name: "__form__"
+    values: {}
 };
 
 Form.propTypes = {
     onSubmit: PropTypes.func,
     onChange: PropTypes.func,
-    name: PropTypes.string
+    values: PropTypes.object
 };

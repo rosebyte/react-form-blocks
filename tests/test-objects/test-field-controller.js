@@ -12,7 +12,8 @@ class TestFieldController extends PureComponent {
                    className={this.props.className}
                    watch={this.props.watch}
                    validate={this.props.validate}
-                   sync={this.props.sync} />
+                   sync={this.props.sync}
+                   value={this.props.value}/>
         )
     }
 }
@@ -20,6 +21,7 @@ class TestFieldController extends PureComponent {
 TestFieldController.propTypes = {
     name: PropTypes.string.isRequired,
     className: PropTypes.string,
+    value: PropTypes.string,
     sync: PropTypes.func,
     validate: PropTypes.func,
     watch: PropTypes.array

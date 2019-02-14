@@ -1,5 +1,5 @@
 import React from 'react';
-import {getEventValue, preventDefault} from "../helpers/utils"
+import {preventDefault} from "../helpers/utils"
 import PropTypes from "prop-types"
 import withForm from "../helpers/with-form";
 import {ELEMENTS} from "./form";
@@ -7,11 +7,7 @@ import renderElement from "../helpers/render-element";
 
 class Field extends React.Component {
     name = this.props.name;
-    state = {
-        touched: false,
-        dirty: false,
-        value: this.props.value
-    };
+    state = {touched: false, dirty: false, value: this.props.value};
 
     facade = (() => {
         const self = this;
@@ -24,12 +20,10 @@ class Field extends React.Component {
         }
     })();
 
-    handlePeerChange = field => {
-        if(this.props.watch.indexOf(field.name) > -1){
-            let synced = this.props.sync(this.props.form.fields, this.facade);
-            if(synced !== this.value){
-                this.setState({...this.state, value: synced});
-            }
+    challenge = () => {
+        let synced = this.props.sync(this.props.form.fields, this.facade);
+        if(synced !== this.value){
+            this.setState({...this.state, value: synced});
         }
     };
 
@@ -41,16 +35,9 @@ class Field extends React.Component {
         this.props.onBlur(event);
     };
 
-    extractValue = event => {
-        if(this.props.extractValue){
-            return this.props.extractValue(event);
-        }
-        return getEventValue(event, this.props.type);
-    };
-
     handleChange = event => {
         preventDefault(event);
-        let newValue = this.extractValue(event);
+        let newValue = this.props.extractValue(event);
         let value = this.props.edit(this.state.value, newValue);
         if(value !== this.state.value){
             this.setState({...this.state, value, dirty: true});
@@ -58,7 +45,10 @@ class Field extends React.Component {
     };
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.handlePeerChange, this.props.watch);
+        if(!this.props.value && this.props.form.initialValues[this.props.name]){
+            this.setState({...this.state, value: this.props.form.initialValues[this.props.name]})
+        }
+        this.props.form.register(this.facade, this.challenge, this.props.watch);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -132,6 +122,7 @@ Field.propTypes = {
         onChange: PropTypes.func.isRequired,
         register: PropTypes.func.isRequired,
         unregister: PropTypes.func.isRequired,
+        initialValues: PropTypes.object.isRequired
     }).isRequired
 };
 
@@ -145,7 +136,8 @@ Field.defaultProps = {
     hide: false,
     watch: [],
     edit: (oldVal, newVal) => newVal,
-    sync: (fields, field) => field.value
+    sync: (fields, field) => field.value,
+    extractValue: event => event.target.value
 };
 
 export default withForm(Field)

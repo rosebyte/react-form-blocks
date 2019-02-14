@@ -31,7 +31,7 @@ it("should pass message", () => {
 
 it('should validate using string after change', () => {
     let state = null;
-    let validate = field => "Error: " + field.value;
+    let validate = field => "Error: " + field[NAME].value;
     const sut = (
         <Form>
             <TestFieldController value={VALUE} name={NAME}/>
@@ -58,7 +58,7 @@ it("should work in components hierarchy", () => {
     const element = (
         <Form fields={{test:{message: VALUE, touched: true}}}>
             <TestFieldController value="test" name={NAME} />
-            <TestMessageController validate={x => "Error: " + x.value}
+            <TestMessageController validate={x => "Error: " + x[NAME].value}
                                    name={NAME}
                                    level={LEVELS.always} />
         </Form>

@@ -5,7 +5,7 @@ import Field from "../../src/components/field";
 import Button from "../../src/components/button";
 import Adapter from 'enzyme-adapter-react-16';
 import TestMessageController from "../test-objects/test-message-controller";
-import {LEVELS} from "../../src/components/message";
+import TestFieldController from "../test-objects/test-field-controller";
 
 configure({adapter: new Adapter()});
 
@@ -150,18 +150,14 @@ describe("Form tests", () => {
     });
 
     it('should pass fields to context', () => {
-        let testfields = {
-            name: {value: "value1", error: "error1", warning: "warning1"},
-            surname: {value: "value2", error: "error2", warning: "warning2"},
-        };
-
         const sut = (
-            <Form fields={testfields}>
+            <Form>
+                <TestFieldController name={"test"} value={"t"}/>
                 <Button value="name"/>
             </Form>
         );
         const wrapper = mount(sut);
-        expect(wrapper.find("button").parent().prop("form").fields).toBe(testfields)
+        expect(wrapper.find("button").parent().prop("form").fields.test.value).toBe("t")
     });
 
     it("should be working when submitting", done => {
@@ -218,34 +214,13 @@ describe("Form tests", () => {
         });
     });
 
-    it("should be submitted after submitting", done => {
-        let submitting = false;
-
-        function handleSubmit () {
-            submitting = true;
-        }
-
-        const element = (
-            <Form onSubmit={handleSubmit} />
-        );
-        const wrapper = mount(element);
-        expect(wrapper.instance().state.submitted).toBeFalsy();
-        wrapper.simulate("submit");
-
-        setImmediate(() => {
-            expect(submitting).toBeTruthy();
-            expect(wrapper.instance().state.submitted).toBeTruthy();
-            done();
-        });
-    });
-
     it("should pass submitted to context", done => {
         const element = (
             <Form><Button value={name}/></Form>
         );
         const wrapper = mount(element);
         expect(wrapper.find("button").parent().prop("form").submitted).toBeFalsy();
-        wrapper.simulate("submit");
+        wrapper.find("button").simulate("click");
 
         setImmediate(() => {
             expect(wrapper.find("button").parent().prop("form").submitted).toBeTruthy();
@@ -319,11 +294,15 @@ describe("Form tests", () => {
     it("should emit on Changes when submitting", done => {
         const fields = "AASSS";
         let changes = [];
-        const element = <Form onChange={event => changes.push(event)} />;
+        const element = (
+            <Form onChange={event => changes.push(event)}>
+                <Button/>
+            </Form>
+        );
         const wrapper = mount(element);
         const form = wrapper.instance();
         form.fields = fields;
-        wrapper.simulate("submit");
+        wrapper.find("button").simulate("click");
 
         setImmediate(() => {
             expect(changes.length).toBe(2);
@@ -400,17 +379,5 @@ describe("Form tests", () => {
         const wrapper = mount(element);
 
         wrapper.simulate("submit", {target:{}});
-    });
-
-    it("should submit form without setting it submitted", () => {
-        const element = (
-            <Form onSubmit={() => {}}>
-                <Button name="testButton" value={"test button"} setSubmitted={false} />
-            </Form>
-        );
-        const wrapper = mount(element);
-        wrapper.find("button").simulate("click");
-
-        expect(wrapper.instance().state.submitted).toBeFalsy();
     });
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import {FormContext} from "../../src/components/form"
+import FormContext from "../../src/helpers/context"
 import deepmerge from "./deep-merge";
 
 const defaultContext = {
