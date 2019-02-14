@@ -107,6 +107,7 @@ Message.propTypes = {
     render: PropTypes.func,
     children: PropTypes.any,
     component: PropTypes.any,
+    validate: PropTypes.func,
     watch: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
     form: PropTypes.shape({
         fields: PropTypes.object,
