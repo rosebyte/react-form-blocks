@@ -2,7 +2,7 @@ import React from "react"
 import {shallow, configure, mount} from "enzyme"
 import Adapter from 'enzyme-adapter-react-16';
 import Field from "../../src/components/field";
-import Form from "../../src/components/form";
+import Form, {ELEMENTS} from "../../src/components/form";
 import TestFieldController from "../test-objects/test-field-controller"
 
 configure({adapter: new Adapter()});
@@ -41,10 +41,14 @@ describe("Field tests", () =>{
 
     it('should register component after mount', () => {
         const testValue = "testValue";
-        const element = <Form><Field name={testValue}/></Form>;
+        const element = <Form><Field name={testValue} watch={["iSee"]}/></Form>;
         const wrapper = mount(element);
         expect(wrapper.instance().fields[testValue]).not.toBeUndefined();
-        expect(wrapper.instance().valueHandlers[testValue]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["iSee"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["iSee"].length).toBe(1);
+        expect(wrapper.instance().handlers["iSee"][0].name).toBe(testValue);
+        expect(wrapper.instance().handlers["iSee"][0].type).toBe(ELEMENTS.FIELD);
+        expect(wrapper.instance().handlers["iSee"][0].handler).not.toBeUndefined();
     });
 
     it('should render radio component with default value', () => {

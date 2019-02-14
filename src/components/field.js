@@ -58,7 +58,7 @@ class Field extends React.Component {
     };
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.handlePeerChange);
+        this.props.form.register(this.facade, this.handlePeerChange, this.props.watch);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -123,7 +123,7 @@ Field.propTypes = {
     extractValue: PropTypes.func,
     edit: PropTypes.func,
     sync: PropTypes.func,
-    watch: PropTypes.array,
+    watch: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
     type: PropTypes.string,
     hide: PropTypes.bool,
     disabled: PropTypes.bool,

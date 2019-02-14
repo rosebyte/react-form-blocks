@@ -11,7 +11,8 @@ export default class TestMessageController extends PureComponent {
                      level={this.props.level}
                      title="test title"
                      validate={this.props.validate}
-                     onChange={this.props.onChange} />
+                     onChange={this.props.onChange}
+                     watch={this.props.watch}/>
         )
     }
 }

@@ -30,7 +30,7 @@ class Message extends PureComponent {
     })();
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.challenge);
+        this.props.form.register(this.facade, this.challenge, this.props.watch);
     }
 
     componentWillUnmount(){
@@ -107,6 +107,7 @@ Message.propTypes = {
     render: PropTypes.func,
     children: PropTypes.any,
     component: PropTypes.any,
+    watch: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
     form: PropTypes.shape({
         fields: PropTypes.object,
         submitted: PropTypes.bool
@@ -118,7 +119,8 @@ Message.defaultProps = {
     onChange: () => {},
     validate: () => {},
     hide: false,
-    name: "__form__"
+    name: "__form__",
+    watch: []
 };
 
 export default withForm(Message);

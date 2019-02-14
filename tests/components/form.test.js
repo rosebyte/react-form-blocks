@@ -14,51 +14,60 @@ describe("Form tests", () => {
         const sut = (
             <Form>
                 <Field name="firstField" />
-                <Field name="secondField" />
+                <Field name="secondField" watch={"firstField"} />
             </Form>
         );
         const wrapper = mount(sut);
 
         expect(wrapper.instance().fields["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().fields["secondField"]).not.toBeUndefined();
-        expect(wrapper.instance().valueHandlers["firstField"]).not.toBeUndefined();
-        expect(wrapper.instance().valueHandlers["secondField"]).not.toBeUndefined();
-        expect(wrapper.instance().errorHandlers["firstField"]).toBeUndefined();
-        expect(wrapper.instance().errorHandlers["secondField"]).toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"].length).toBe(1);
     });
 
     it('should unregister field', () => {
         const sut = (
             <Form>
-                <Field name="firstField" />
+                <Field name="firstField" watch={["A", "B"]} />
+                <Field name="secondField" watch={"A"} />
             </Form>
         );
         const wrapper = mount(sut);
 
         expect(wrapper.instance().fields["firstField"]).not.toBeUndefined();
-        expect(wrapper.instance().valueHandlers["firstField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["A"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["A"].length).toBe(2);
+        expect(wrapper.instance().handlers["B"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["B"].length).toBe(1);
 
         wrapper.instance().unregister({name: "firstField", type: ELEMENTS.FIELD});
 
         expect(wrapper.instance().fields["firstField"]).toBeUndefined();
-        expect(wrapper.instance().valueHandlers["firstField"]).toBeUndefined();
+        expect(wrapper.instance().fields["secondField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["A"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["A"].length).toBe(1);
+        expect(wrapper.instance().handlers["B"]).toBeUndefined();
     });
 
     it('should unregister message', () => {
         const sut = (
             <Form>
-                <TestMessageController name="firstField" />
+                <TestMessageController name="firstField" watch={["watched"]} />
             </Form>
         );
         const wrapper = mount(sut);
 
         expect(wrapper.instance().messages["firstField"]).not.toBeUndefined();
-        expect(wrapper.instance().errorHandlers["firstField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"].length).toBe(1);
+        expect(wrapper.instance().handlers["watched"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["watched"].length).toBe(1);
 
         wrapper.instance().unregister({name: "firstField", type: ELEMENTS.MESSAGE});
 
         expect(wrapper.instance().messages["firstField"]).toBeUndefined();
-        expect(wrapper.instance().errorHandlers["firstField"]).toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"]).toBeUndefined();
+        expect(wrapper.instance().handlers["watched"]).toBeUndefined();
     });
 
     it('should register message', () => {
@@ -72,12 +81,19 @@ describe("Form tests", () => {
 
         expect(wrapper.instance().fields["firstField"]).toBeUndefined();
         expect(wrapper.instance().fields["secondField"]).toBeUndefined();
-        expect(wrapper.instance().valueHandlers["firstField"]).toBeUndefined();
-        expect(wrapper.instance().valueHandlers["secondField"]).toBeUndefined();
-        expect(wrapper.instance().errorHandlers["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().messages["firstField"]).not.toBeUndefined();
-        expect(wrapper.instance().errorHandlers["secondField"]).not.toBeUndefined();
         expect(wrapper.instance().messages["secondField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["firstField"].length).toBe(1);
+        expect(wrapper.instance().handlers["firstField"][0].name).toBe("firstField");
+        expect(wrapper.instance().handlers["firstField"][0].type).toBe(ELEMENTS.MESSAGE);
+        expect(wrapper.instance().handlers["firstField"][0].handler).not.toBeUndefined();
+        expect(wrapper.instance().handlers["secondField"]).not.toBeUndefined();
+        expect(wrapper.instance().handlers["secondField"].length).toBe(1);
+        expect(wrapper.instance().handlers["secondField"][0].name).toBe("secondField");
+        expect(wrapper.instance().handlers["secondField"][0].type).toBe(ELEMENTS.MESSAGE);
+        expect(wrapper.instance().handlers["secondField"][0].handler).not.toBeUndefined();
+
     });
 
     it('should render field', () => {
@@ -240,32 +256,26 @@ describe("Form tests", () => {
     it("should notify of field change", () => {
         const fields = {a:{}, b: {}};
         let result = {};
-        let result2 = {};
 
         const element = (
             <Form><Button value={name}/></Form>
         );
         const wrapper = mount(element);
         const form = wrapper.instance();
-        form.fields = fields;
-        form.valueHandlers = {
-            a:(field => result.a = field),
-            b:(field => result.b = field)
-        };
 
-        form.errorHandlers = {
-            a:(() => result2.a = true),
-            b:(() => result2.b = true)
+        form.fields = fields;
+        form.handlers = {
+            a:[{handler: (field => result.a = field)}, {handler: (field => result.b = field)}],
+            b:[{handler: (field => result.c = field)}]
         };
 
         const a = {name: "a", value:"A"};
 
         form.onChange(a, {name: "a", value:"B"});
 
-        expect(result.a).toBeUndefined();
+        expect(result.a.name).toBe("a");
         expect(result.b.name).toBe("a");
-        expect(result2.a).toBeTruthy();
-        expect(result2.b).toBeTruthy();
+        expect(result.c).toBeUndefined();
     });
 
     it("should emit on Change after field changed", () => {

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types"
-import {checkActiveElement, forEachProperty, preventDefault} from "../helpers/utils";
+import {checkActiveElement, forEachProperty, isString, preventDefault} from "../helpers/utils";
 
 export const FormContext = React.createContext({});
 export const ELEMENTS = {
@@ -14,36 +14,62 @@ export default class Form extends Component {
     message = null;
     fields = this.props.fields || {};
     messages = this.props.messages || {};
-    valueHandlers = {};
-    errorHandlers = {};
+    handlers = {};
     state = {
         working: false,
         submitted: false,
     };
 
     onChange = facade => {
-        forEachProperty(this.valueHandlers, (f, p) => {if(p !== facade.name){f(facade)}});
-        forEachProperty(this.errorHandlers, f => f(facade));
+        if(this.handlers[facade.name]){
+            this.handlers[facade.name].forEach(x => x.handler(facade));
+        }
         this.props.onChange(this.facade);
     };
 
-    register = (facade, handler) => {
+    register = (facade, handler, watch) => {
+        const watcher = {name: facade.name, type: facade.type, handler};
+
         if(facade.type === ELEMENTS.FIELD){
             this.fields[facade.name] = facade;
-            this.valueHandlers[facade.name] = handler;
         } else if(facade.type === ELEMENTS.MESSAGE){
             this.messages[facade.name] = facade;
-            this.errorHandlers[facade.name] = handler;
+
+            if(!this.handlers[facade.name]){
+                this.handlers[facade.name] = [watcher]
+            } else {
+                this.handlers[facade.name].push(watcher);
+            }
+        }
+        if(isString(watch)){
+            watch = [watch];
+        }
+        if(watch){
+            watch.forEach(x => {
+                if(!this.handlers[x]){
+                    this.handlers[x] = [watcher]
+                } else {
+                    this.handlers[x].push(watcher);
+                }
+            });
         }
     };
 
     unregister = facade => {
         if(facade.type === ELEMENTS.FIELD){
             delete this.fields[facade.name];
-            delete this.valueHandlers[facade.name];
         } else if(facade.type === ELEMENTS.MESSAGE){
             delete this.messages[facade.name];
-            delete this.errorHandlers[facade.name];
+        }
+        delete this.handlers[facade.name];
+        for (let item in this.handlers){
+            if(this.handlers.hasOwnProperty(item)){
+                this.handlers[item] = this.handlers[item]
+                    .filter(y => y.name !== facade.name || y.type !== facade.type);
+                if(!this.handlers[item].length){
+                    delete this.handlers[item];
+                }
+            }
         }
     };
 
