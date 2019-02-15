@@ -69,7 +69,7 @@ export default class Form extends React.Component {
         if(isString(watch)){
             watch = [watch];
         }
-        if(watch){
+        if(watch && watch.length){
             watch.forEach(x => {
                 if(!this.handlers[x]){
                     this.handlers[x] = [watcher]

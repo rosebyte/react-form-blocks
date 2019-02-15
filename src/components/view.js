@@ -30,7 +30,7 @@ class View extends PureComponent {
         const value = this.props.sync(this.props.form.fields);
         if(value === this.state.value) return;
         this.setState({...this.state, value});
-        this.onChange(this.facade);
+        this.props.onChange(this.facade);
     };
 
     componentDidUpdate(prevProps){
@@ -43,16 +43,17 @@ class View extends PureComponent {
     render() {
         let {display, hide, ...rest} = this.props;
         delete rest.name;
+        delete rest.value;
 
-        if(display === DISPLAY.never || hide || !state.value){return null;}
-        if(level === DISPLAY.submitted && !this.props.form.submitted){return null;}
+        if(display === DISPLAY.NEVER || hide || !this.state.value){return null;}
+        if(display === DISPLAY.SUBMITTED && !this.props.form.submitted){return null;}
 
         return renderElement({value: this.state.value}, rest);
     }
 }
 
 View.propTypes = {
-    name: PropTypes.string.isRequired,
+    name: PropTypes.string,
     hide: PropTypes.bool,
     display: PropTypes.number,
     render: PropTypes.func,
@@ -60,7 +61,7 @@ View.propTypes = {
     component: PropTypes.any,
     sync: PropTypes.func.isRequired,
     onChange: PropTypes.func,
-    watch: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
+    watch: PropTypes.oneOfType([PropTypes.array, PropTypes.string]).isRequired,
     form: PropTypes.shape({
         fields: PropTypes.object,
         submitted: PropTypes.bool
@@ -70,6 +71,7 @@ View.propTypes = {
 View.defaultProps = {
     display: DISPLAY.ALWAYS,
     onChange: () => {},
+    sync: () => {},
     hide: false,
     watch: [],
     value: null

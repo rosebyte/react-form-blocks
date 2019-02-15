@@ -2,9 +2,9 @@ import React from "react"
 import {configure, mount} from "enzyme"
 import Adapter from 'enzyme-adapter-react-16';
 import Form from "../../src/components/form";
-import BaseMessage from "../../src/components/message";
+import BaseView from "../../src/components/view";
 import {DISPLAY} from "../../src/helpers/enums";
-import TestMessageController from "../test-objects/test-message-controller"
+import TestViewController from "../test-objects/test-view-controller"
 import {withFakeContext} from "../test-helpers/context-provider";
 import TestFieldController from "../test-objects/test-field-controller";
 import deepmerge from "../test-helpers/deep-merge";
@@ -15,28 +15,28 @@ const ID = "msg";
 const REF = "#" + ID;
 const NAME = "test";
 
-function Message(props){
+function View(props){
     const {context, name = NAME, ...rest} = props;
     const defaultField = {};
     defaultField[NAME] = {message: VALUE, touched: false, dity: false};
     const ctx = deepmerge({}, {fields: defaultField}, context);
     const field = {...rest, name};
-    const message = (<BaseMessage {...field}>{x => <p id={ID}>{x.message}</p>}</BaseMessage>);
+    const message = (<BaseView {...field}>{x => <p id={ID}>{x.value}</p>}</BaseView>);
     return withFakeContext(ctx, message);
 }
 
-it("should pass message", () => {
-    const dom = mount(<Message diplay={DISPLAY.always} value={VALUE} />);
+it("should pass value", () => {
+    const dom = mount(<View diplay={DISPLAY.always} value={VALUE} />);
     expect(dom.find(REF).text()).toBe(VALUE);
 });
 
 it('should validate using string after change', () => {
     let state = null;
-    let validate = field => "Error: " + field[NAME].value;
+    let sync = field => "Error: " + field[NAME].value;
     const sut = (
         <Form>
             <TestFieldController value={VALUE} name={NAME}/>
-            <TestMessageController name={NAME} validate={validate} onChange={x => state = x} />
+            <TestViewController watch={NAME} sync={sync} onChange={x => state = x} />
         </Form>
     );
     const wrapper = mount(sut);
@@ -50,7 +50,7 @@ it("shouldn't pass empty message", () => {
         display: DISPLAY.ALWAYS
     };
 
-    const dom = mount(<Message {...props} />);
+    const dom = mount(<View {...props} />);
 
     expect(dom.find(REF).exists()).toBeFalsy();
 });
@@ -59,26 +59,26 @@ it("should work in components hierarchy", () => {
     const element = (
         <Form fields={{test:{message: VALUE, touched: true}}}>
             <TestFieldController value="test" name={NAME} />
-            <TestMessageController validate={x => "Error: " + x[NAME].value}
-                                   name={NAME}
-                                   display={DISPLAY.always} />
+            <TestViewController sync={x => "Error: " + x[NAME].value}
+                                   watch={NAME}
+                                   display={DISPLAY.ALWAYS} />
         </Form>
     );
 
     const wrapper = mount(element);
     wrapper.find("input").simulate("change", {target:{value: "changed"}});
-    expect(wrapper.find(".error").text()).toBe("Error: changed");
+    expect(wrapper.find(".view").text()).toBe("Error: changed");
 });
 
 it("should be hidden with hide prop", () => {
-    const dom = mount(<Message display={DISPLAY.always} hide={true} />);
+    const dom = mount(<View display={DISPLAY.always} hide={true} />);
 
     expect(dom.find(REF).exists()).toBeFalsy();
 });
 
 describe("message display tests", () => {
     it("shouldn't show submitted display when not submitted", () => {
-        const dom = mount(<Message display={DISPLAY.submitted} />);
+        const dom = mount(<View display={DISPLAY.submitted} />);
 
         expect(dom.find(REF).exists()).toBeFalsy();
     });
@@ -86,7 +86,7 @@ describe("message display tests", () => {
     it("should show submitted display when submitted", () => {
         const props = {display: DISPLAY.submitted, value: VALUE, context: {submitted: true}};
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
@@ -94,7 +94,7 @@ describe("message display tests", () => {
     it("should show always display even when not submitted, touched, dirty", () => {
         const props = {display: DISPLAY.always, value: VALUE};
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
@@ -105,13 +105,13 @@ describe("message display tests", () => {
             context: {fields: {test:{dity: true, touched: true}}, submitted: true}
         };
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).exists()).toBeFalsy();
     });
 
     it("should not show when touched display and not touched, submited", () => {
-        const dom = mount(<Message display={DISPLAY.touched} />);
+        const dom = mount(<View display={DISPLAY.touched} />);
 
         expect(dom.find(REF).exists()).toBeFalsy();
     });
@@ -123,7 +123,7 @@ describe("message display tests", () => {
             value: VALUE
         };
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
@@ -135,13 +135,13 @@ describe("message display tests", () => {
             value: VALUE
         };
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
 
     it("should not show when dirty display and not dirty", () => {
-        const dom = mount(<Message display={DISPLAY.dirty} />);
+        const dom = mount(<View display={DISPLAY.dirty} />);
 
         expect(dom.find(REF).exists()).toBeFalsy();
     });
@@ -153,13 +153,13 @@ describe("message display tests", () => {
             value: VALUE
         };
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
 
     it("should not show when changed display and not dirty, touched, submitted", () => {
-        const dom = mount(<Message display={DISPLAY.CHANGED} />);
+        const dom = mount(<View display={DISPLAY.CHANGED} />);
 
         expect(dom.find(REF).exists()).toBeFalsy();
     });
@@ -171,7 +171,7 @@ describe("message display tests", () => {
             value: VALUE
         };
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
@@ -183,7 +183,7 @@ describe("message display tests", () => {
             value: VALUE
         };
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
@@ -191,7 +191,7 @@ describe("message display tests", () => {
     it("should show when changed display and submitted", () => {
         const props = {display: DISPLAY.CHANGED, context: {submitted: true}, value: VALUE};
 
-        const dom = mount(<Message {...props} />);
+        const dom = mount(<View {...props} />);
 
         expect(dom.find(REF).text()).toBe(VALUE);
     });
