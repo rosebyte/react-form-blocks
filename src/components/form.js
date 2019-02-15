@@ -3,12 +3,8 @@ import PropTypes from "prop-types"
 import {any, isString, preventDefault} from "../helpers/utils";
 import warning from "tiny-warning";
 import FormContext from "../helpers/context"
+import {ELEMENTS} from "../helpers/enums";
 
-export const ELEMENTS = {
-    FIELD: "field",
-    MESSAGE: "message",
-    FORM: "form"
-};
 
 export default class Form extends React.Component {
     fields = {};

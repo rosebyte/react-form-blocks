@@ -2,7 +2,7 @@ import React from 'react';
 import {preventDefault} from "../helpers/utils"
 import PropTypes from "prop-types"
 import withForm from "../helpers/with-form";
-import {ELEMENTS} from "./form";
+import {ELEMENTS} from "../helpers/enums";
 import renderElement from "../helpers/render-element";
 
 class Field extends React.Component {

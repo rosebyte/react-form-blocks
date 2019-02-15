@@ -1,17 +1,10 @@
 import React, {PureComponent} from 'react';
 import PropTypes from "prop-types"
-import {ELEMENTS} from "./form";
+import {ELEMENTS, DISPLAY} from "../helpers/enums";
 import withForm from "../helpers/with-form";
 import renderElement from "../helpers/render-element";
 
-export const LEVELS = {
-    always: 0,
-    changed: 1,
-    dirty: 2,
-    touched: 3,
-    submitted: 4,
-    never: 5
-};
+
 
 class Message extends PureComponent {
     state = {value: this.props.value || null, ran: false};
@@ -65,21 +58,18 @@ class Message extends PureComponent {
     }
 
     render() {
-        let {name, level, hide, ...rest} = this.props;
+        let {name, display, hide, ...rest} = this.props;
         const value = this.state.value;
 
         const field = this.props.form.fields[name];
-        if(!field){
-            level = LEVELS.submitted;
-        }
         if(!value){return null;}
         const submitted = this.props.form.submitted;
 
-        if(level === LEVELS.never || hide){return null;}
-        if(level === LEVELS.submitted && !submitted){return null;}
-        if(level === LEVELS.touched && !field.touched && !submitted){return null;}
-        if(level === LEVELS.dirty && !field.dirty){return null;}
-        if(level === LEVELS.changed && !field.dirty && !field.touched && !submitted){return null;}
+        if(display === DISPLAY.NEVER || hide){return null;}
+        if(display === DISPLAY.SUBMITTED && !submitted){return null;}
+        if(display === DISPLAY.TOUCHED && !field.touched && !submitted){return null;}
+        if(display === DISPLAY.DIRTY && !field.dirty){return null;}
+        if(display === DISPLAY.CHANGED && !field.dirty && !field.touched && !submitted){return null;}
 
         return renderElement({message: value}, rest);
     }
@@ -88,7 +78,7 @@ class Message extends PureComponent {
 Message.propTypes = {
     name: PropTypes.string.isRequired,
     hide: PropTypes.bool,
-    level: PropTypes.number,
+    display: PropTypes.number,
     render: PropTypes.func,
     children: PropTypes.any,
     component: PropTypes.any,
@@ -103,7 +93,7 @@ Message.propTypes = {
 };
 
 Message.defaultProps = {
-    level: LEVELS.touched,
+    display: DISPLAY.TOUCHED,
     onChange: () => {},
     validate: () => {},
     hide: false,

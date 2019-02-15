@@ -2,7 +2,8 @@ import React from "react"
 import {shallow, configure, mount} from "enzyme"
 import Adapter from 'enzyme-adapter-react-16';
 import Field from "../../src/components/field";
-import Form, {ELEMENTS} from "../../src/components/form";
+import Form from "../../src/components/form";
+import {ELEMENTS} from "../../src/helpers/enums";
 import TestFieldController from "../test-objects/test-field-controller"
 
 configure({adapter: new Adapter()});

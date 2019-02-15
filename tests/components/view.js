@@ -26,7 +26,7 @@ function Message(props){
 }
 
 it("should pass message", () => {
-    const dom = mount(<Message display={DISPLAY.ALWAYS} value={VALUE} />);
+    const dom = mount(<Message diplay={DISPLAY.always} value={VALUE} />);
     expect(dom.find(REF).text()).toBe(VALUE);
 });
 
@@ -61,7 +61,7 @@ it("should work in components hierarchy", () => {
             <TestFieldController value="test" name={NAME} />
             <TestMessageController validate={x => "Error: " + x[NAME].value}
                                    name={NAME}
-                                   display={DISPLAY.ALWAYS} />
+                                   display={DISPLAY.always} />
         </Form>
     );
 
@@ -78,13 +78,13 @@ it("should be hidden with hide prop", () => {
 
 describe("message display tests", () => {
     it("shouldn't show submitted display when not submitted", () => {
-        const dom = mount(<Message display={DISPLAY.SUBMITTED} />);
+        const dom = mount(<Message display={DISPLAY.submitted} />);
 
         expect(dom.find(REF).exists()).toBeFalsy();
     });
 
     it("should show submitted display when submitted", () => {
-        const props = {display: DISPLAY.SUBMITTED, value: VALUE, context: {submitted: true}};
+        const props = {display: DISPLAY.submitted, value: VALUE, context: {submitted: true}};
 
         const dom = mount(<Message {...props} />);
 
@@ -92,7 +92,7 @@ describe("message display tests", () => {
     });
 
     it("should show always display even when not submitted, touched, dirty", () => {
-        const props = {display: DISPLAY.ALWAYS, value: VALUE};
+        const props = {display: DISPLAY.always, value: VALUE};
 
         const dom = mount(<Message {...props} />);
 
@@ -148,7 +148,7 @@ describe("message display tests", () => {
 
     it("should show when dirty display and dirty", () => {
         const props = {
-            display: DISPLAY.DIRTY,
+            display: DISPLAY.dirty,
             context: {fields: {test:{dirty: true}}},
             value: VALUE
         };

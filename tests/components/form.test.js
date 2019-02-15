@@ -1,5 +1,6 @@
 import React from "react"
-import Form, {ELEMENTS} from "../../src/components/form"
+import Form from "../../src/components/form"
+import {ELEMENTS} from "../../src/helpers/enums"
 import {configure, mount} from "enzyme"
 import Field from "../../src/components/field";
 import Button from "../../src/components/button";
