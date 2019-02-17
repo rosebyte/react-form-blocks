@@ -1,6 +1,6 @@
 {
   "name": "react-form-blocks",
-  "version": "0.0.6",
+  "version": "0.0.9",
   "keywords": [
     "react",
     "form"
@@ -23,7 +23,7 @@
     "test": "jest",
     "build:clean": "rimraf dist",
     "build:dist": "rollup -c",
-    "build": "npm run build:clean&&npm run build:dist"
+    "build": "npm run test&&npm run build:clean&&npm run build:dist"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

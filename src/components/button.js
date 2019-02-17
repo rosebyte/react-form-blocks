@@ -20,6 +20,7 @@ class Button extends React.Component {
             disabled: disabled !== null ? disabled : form ? form.working : false,
             type: type,
             value: !value && isString(children) ? children : value,
+            children: children || value,
             onClick: this.handleClick,
             name: name
         };

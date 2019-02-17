@@ -63,7 +63,13 @@ export default class Form extends React.Component {
             if(!this.handlers[facade.name]){
                 this.handlers[facade.name] = [watcher]
             } else {
-                this.handlers[facade.name].push(watcher);
+                const handlerIsPresent = any(
+                    this.handlers[facade.name],
+                    x => x.name === facade.name && x.type === facade.type
+                );
+                if(!handlerIsPresent){
+                    this.handlers[facade.name].push(watcher);
+                }
             }
         }
         if(isString(watch)){
@@ -74,7 +80,13 @@ export default class Form extends React.Component {
                 if(!this.handlers[x]){
                     this.handlers[x] = [watcher]
                 } else {
-                    this.handlers[x].push(watcher);
+                    const handlerIsPresent = any(
+                        this.handlers[x],
+                        x => x.name === facade.name && x.type === facade.type
+                    );
+                    if(!handlerIsPresent) {
+                        this.handlers[x].push(watcher);
+                    }
                 }
             });
         }

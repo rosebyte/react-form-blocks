@@ -14,8 +14,8 @@ export default function renderElement (fieldProps, props) {
 
     if (isString(component)) {
         const { innerRef, ...componentProps } = rest;
-        const setup = {ref: innerRef, ...fieldProps, ...componentProps, children};
-        return React.createElement(component, setup);
+        const setup = {ref: innerRef, ...fieldProps, ...componentProps};
+        return React.createElement(component, setup, children);
     }
 
     if(!component){
@@ -23,5 +23,5 @@ export default function renderElement (fieldProps, props) {
             "No component to render, please insert either component, render or children prop.");
     }
 
-    return React.createElement(component, {...fieldProps, ...rest, children});
+    return React.createElement(component, {...fieldProps, ...rest}, children);
 }
