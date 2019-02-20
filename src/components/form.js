@@ -144,13 +144,11 @@ export default class Form extends React.Component {
 }
 
 Form.defaultProps = {
-    onSubmit: () => {},
     onChange: () => {},
     values: {}
 };
 
 Form.propTypes = {
-    onSubmit: PropTypes.func,
     onChange: PropTypes.func,
     values: PropTypes.object
 };
