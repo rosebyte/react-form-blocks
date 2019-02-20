@@ -46,3 +46,15 @@ their change)
 ### Message
 
 ### View
+Displays value based on fields values
+
+* name (required): name of the view, it should be valid JS identifier
+* hide: hides lower components when true
+* render: standard render prop
+* children: if function, it is used to render view
+* component: component to play as an view
+* onChange: when view has some changes, it fires this function with one parameter (view facade)
+* sync: edit value by values of fields, it receives one parameter - fields -
+containing facades of all form's fields and returns new value for the view
+* watch: field name or array of field names to watch (i.e. to fire sync function after their change)
+* display: indicates when to display view element, based on DISPLAY enum
