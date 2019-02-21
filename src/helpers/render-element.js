@@ -1,20 +1,20 @@
 import React from "react";
 import {isFunction, isString} from "./utils";
 
-export default function renderElement (fieldProps, props) {
+export default function renderElement (props, extendedProps) {
     const {component, children, render, ...rest} = props;
 
     if (render) {
-        return render(fieldProps);
+        return render({...rest, ...extendedProps, children, component});
     }
 
     if (isFunction(children)) {
-        return children(fieldProps);
+        return children({...rest, ...extendedProps, render, component});
     }
 
     if (isString(component)) {
-        const { innerRef, ...componentProps } = rest;
-        const setup = {ref: innerRef, ...fieldProps, ...componentProps};
+        const { innerRef, ...primitiveProps } = rest;
+        const setup = {ref: innerRef, ...primitiveProps};
         return React.createElement(component, setup, children);
     }
 
@@ -23,5 +23,5 @@ export default function renderElement (fieldProps, props) {
             "No component to render, please insert either component, render or children prop.");
     }
 
-    return React.createElement(component, {...fieldProps, ...rest}, children);
+    return React.createElement(component, {...rest, ...extendedProps, render}, children);
 }

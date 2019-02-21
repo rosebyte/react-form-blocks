@@ -71,7 +71,7 @@ it("should work in components hierarchy", () => {
 });
 
 it("should be hidden with hide prop", () => {
-    const dom = mount(<View display={DISPLAY.always} hide={true} />);
+    const dom = mount(<View display={DISPLAY.ALWAYS} hide={true} />);
 
     expect(dom.find(REF).exists()).toBeFalsy();
 });

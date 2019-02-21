@@ -12,7 +12,7 @@ describe("Field tests", () =>{
     it('should render the component with defaults', () => {
         const wrapper = mount(<Form><Field name="test"/></Form>);
 
-        expect(wrapper.html()).toBe('<form><input name="test" type="text" value=""></form>');
+        expect(wrapper.html()).toBe('<form><input type="text" value=""></form>');
         expect(wrapper.find("input").prop("value")).toBe("");
     });
 
@@ -37,7 +37,7 @@ describe("Field tests", () =>{
         const testValue = "testValue";
         const element = <Form><Field name={testValue}/></Form>;
         const wrapper = mount(element);
-        expect(wrapper.find("input").prop("name")).toBe(testValue);
+        expect(wrapper.find("input").parent().prop("name")).toBe(testValue);
     });
 
     it('should register component after mount', () => {
@@ -125,14 +125,25 @@ describe("Field tests", () =>{
     });
 
     it('should run children function', () => {
-        const element = <Form><Field name="test">{(props) => <input {...props} />}</Field></Form>;
+        const element = <Form><Field name="test">
+        {
+            (props) => {
+                const {sync, validate, edit, extractValue, ...rest} = props;
+                return <input {...rest} />
+            }
+        }</Field></Form>;
         const wrapper = mount(element);
 
         expect(wrapper.find("input").type()).toBe("input");
     });
 
     it('should run render function', () => {
-        const element = <Form><Field name="test" render={(props) => <input {...props} />} /></Form>;
+        const element = <Form><Field name="test" render={
+            (props) => {
+                const {sync, validate, edit, extractValue, ...rest} = props;
+                return <input {...rest} />
+            }
+        } /></Form>;
         const wrapper = mount(element);
 
         expect(wrapper.find("input").type()).toBe("input");

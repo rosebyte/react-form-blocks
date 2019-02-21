@@ -58,7 +58,7 @@ class Message extends PureComponent {
     }
 
     render() {
-        let {name, display, hide, ...rest} = this.props;
+        let {component, render, children, name, display, hide, className, ...rest} = this.props;
         const value = this.state.value;
 
         const field = this.props.form.fields[name];
@@ -71,7 +71,9 @@ class Message extends PureComponent {
         if(display === DISPLAY.DIRTY && !field.dirty){return null;}
         if(display === DISPLAY.CHANGED && !field.dirty && !field.touched && !submitted){return null;}
 
-        return renderElement({message: value}, rest);
+        return hide ? null : renderElement(
+            {component, render, children, className},
+            {message: value, name, display, hide, ...rest});
     }
 }
 

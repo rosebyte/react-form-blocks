@@ -68,35 +68,30 @@ class Field extends React.Component {
     }
 
     render() {
-        let {name, disabled, hide, form, noValue, valueName, ...rest} = this.props;
-
-        delete rest.value;
-        delete rest.watch;
-        delete rest.validate;
-        delete rest.onChange;
-        delete rest.onBlur;
-        delete rest.edit;
-        delete rest.sync;
-        delete rest.extractValue;
+        let {
+            component, render, name, disabled, hide, form, noValue, valueName, onChange, onBlur,
+            type, children, className, ...rest
+        } = this.props;
         delete rest.value;
 
-        if(!rest.component && !rest.render && !rest.children){
-            rest["component"] = "input";
-            rest["type"] = rest.type || "text";
+        onChange = this.handleChange;
+        disabled = disabled != null ? disabled : form.working;
+        onBlur = this.handleBlur;
+
+        if(!component && !render && !children){
+            component = "input";
+            type = rest.type || "text";
         }
 
         const field = {
-            name,
-            onChange: this.handleChange,
-            disabled: disabled != null ? disabled : form.working,
-            onBlur: this.handleBlur
+            component, render, children, disabled, type, onChange, onBlur, className
         };
 
         if(!noValue){
             field[valueName] = this.state.value || "";
         }
 
-        return hide ? null : renderElement(field, rest);
+        return hide ? null : renderElement(field, {...rest, name});
     }
 }
 

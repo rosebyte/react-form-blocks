@@ -11,21 +11,19 @@ class Button extends React.Component {
     };
 
     render() {
-        let {form, type, disabled, value, hide, children, name, ...rest} = this.props;
-        delete rest.submit;
-        delete rest.onClick;
-        delete rest.onError;
+        let {
+            form, type, value, hide, disabled, children, name, component, render, onClick,
+            className, ...rest
+        } = this.props;
 
-        const field = {
-            disabled: disabled !== null ? disabled : form ? form.working : false,
-            type: type,
-            value: !value && isString(children) ? children : value,
-            children: children || value,
-            onClick: this.handleClick,
-            name: name
-        };
+        disabled = rest.disabled !== null ? disabled : form ? form.working : false;
+        value = !value && isString(children) ? children : value;
+        children = children || value;
+        onClick = this.handleClick;
 
-        return hide ? null : renderElement(field, {...rest, children});
+        return hide ? null : renderElement(
+            {component, render, children, onClick, disabled, type, className},
+            {...rest, name, value});
     }
 }
 

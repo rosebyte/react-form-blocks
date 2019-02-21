@@ -30,25 +30,28 @@ class View extends PureComponent {
         const value = this.props.sync(this.props.form.fields);
         if(value === this.state.value) return;
         this.setState({...this.state, value});
-        this.props.onChange(this.facade);
     };
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps, prevState){
         if(prevProps.name !== this.props.name){
             prevProps.form.unregister(this.facade);
             this.props.form.register(this.facade, this.challenge);
         }
+        if(prevState !== this.state){
+            this.props.onChange(this.facade);
+        }
     }
 
     render() {
-        let {display, hide, ...rest} = this.props;
-        delete rest.name;
+        let {display, hide, component, render, children, className, ...rest} = this.props;
         delete rest.value;
 
         if(display === DISPLAY.NEVER || hide || !this.state.value){return null;}
         if(display === DISPLAY.SUBMITTED && !this.props.form.submitted){return null;}
 
-        return renderElement({value: this.state.value}, rest);
+        return renderElement(
+            {component, render, children, className},
+            {value: this.state.value, hide, ...rest});
     }
 }
 
