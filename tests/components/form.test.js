@@ -84,11 +84,13 @@ describe("Form tests", () => {
         expect(wrapper.instance().fields["secondField"]).toBeUndefined();
         expect(wrapper.instance().messages["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().messages["secondField"]).not.toBeUndefined();
+
         expect(wrapper.instance().handlers["firstField"]).not.toBeUndefined();
         expect(wrapper.instance().handlers["firstField"].length).toBe(1);
         expect(wrapper.instance().handlers["firstField"][0].name).toBe("firstField");
         expect(wrapper.instance().handlers["firstField"][0].type).toBe(ELEMENTS.MESSAGE);
         expect(wrapper.instance().handlers["firstField"][0].handler).not.toBeUndefined();
+
         expect(wrapper.instance().handlers["secondField"]).not.toBeUndefined();
         expect(wrapper.instance().handlers["secondField"].length).toBe(1);
         expect(wrapper.instance().handlers["secondField"][0].name).toBe("secondField");

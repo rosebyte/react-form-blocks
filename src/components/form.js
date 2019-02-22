@@ -53,29 +53,21 @@ export default class Form extends React.Component {
     };
 
     register = (facade, handler, watch) => {
-        const watcher = {name: facade.name, type: facade.type, handler};
+        if(isString(watch)){
+            watch = [watch];
+        }
 
         if(facade.type === ELEMENTS.FIELD){
             this.fields[facade.name] = facade;
         } else if(facade.type === ELEMENTS.MESSAGE){
             this.messages[facade.name] = facade;
-
-            if(!this.handlers[facade.name]){
-                this.handlers[facade.name] = [watcher]
-            } else {
-                const handlerIsPresent = any(
-                    this.handlers[facade.name],
-                    x => x.name === facade.name && x.type === facade.type
-                );
-                if(!handlerIsPresent){
-                    this.handlers[facade.name].push(watcher);
-                }
+            if(watch.indexOf(facade.name) === -1){
+                watch.push(facade.name);
             }
         }
-        if(isString(watch)){
-            watch = [watch];
-        }
+
         if(watch && watch.length){
+            const watcher = {name: facade.name, type: facade.type, handler};
             watch.forEach(x => {
                 if(!this.handlers[x]){
                     this.handlers[x] = [watcher]

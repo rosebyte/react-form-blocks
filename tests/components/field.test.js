@@ -183,6 +183,32 @@ describe("FormField tests", () => {
         expect(watcherValue).toBe(value + "!");
     });
 
+    it('should be modifiable when watching other field', () => {
+        const value = "I'm changed now!";
+        let result = {};
+        const element = (
+            <Form onChange={x => result = x}>
+                <Field className="first" name="watched"/>
+                <Field className="second"
+                       name="watcher"
+                       watch={["watched"]}
+                       sync={fields => fields.watched.value + "!"} />
+            </Form>
+        );
+        const wrapper = mount(element);
+        const input = wrapper.find("input.first");
+        input.simulate("change", {target:{value}});
+        const watchedValue = wrapper.find("input").at(0).parent().prop("form").fields.watched.value;
+        const watcherValue = wrapper.find("input").at(1).parent().prop("form").fields.watcher.value;
+        expect(watchedValue).toBe(value);
+        expect(watcherValue).toBe(value + "!");
+
+        const second = wrapper.find("input.second");
+        second.simulate("change", {target:{value}});
+        const newWatcherValue = wrapper.find("input").at(1).parent().prop("form").fields.watcher.value;
+        expect(newWatcherValue).toBe(value);
+    });
+
     it("should ignore non-watched field's change", () => {
         const value = "I'm changed now!";
         let syncMethodWasInvoked = false;

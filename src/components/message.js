@@ -20,7 +20,7 @@ class Message extends PureComponent {
     })();
 
     componentDidMount(){
-        this.props.form.register(this.facade, this.challenge, this.props.watch);
+        this.props.form.register(this.facade, this.challenge, [...this.props.watch]);
     }
 
     componentWillUnmount(){
