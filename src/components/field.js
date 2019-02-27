@@ -22,7 +22,7 @@ class Field extends React.Component {
 
     challenge = () => {
         let synced = this.props.sync(this.props.form.fields, this.facade);
-        if(synced !== this.value){
+        if(synced !== this.state.value){
             this.setState({...this.state, value: synced});
         }
     };
